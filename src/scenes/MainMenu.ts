@@ -1,0 +1,77 @@
+import { Scene, GameObjects } from 'phaser';
+import { GH } from '../main';
+
+const MENUS = [
+    { title: 'Campaign', scene: 'Campaign', desc: 'Can you reach the end?' },
+    // { title: 'Endless', scene: 'Game', desc: 'There is no end... until you lose' },
+    { title: 'Training', scene: 'Game', desc: 'You can test every balls here' },
+    { title: 'Tutorial', scene: 'Tutorial', desc: 'Play Tutorial Scenario to learn how to play' },
+    { title: 'Settings', scene: 'Settings', desc: 'Settings' },
+    { title: 'Map Editor', scene: 'MapEditor', desc: 'Create your own map' },
+    { title: 'Credits', scene: 'Credits', desc: 'Credits' },
+]
+export class MainMenu extends Scene {
+    background: GameObjects.Image;
+    logo: GameObjects.Image;
+    title: GameObjects.Text;
+    descriptionText: GameObjects.Text;
+
+    constructor() {
+        super('MainMenu');
+    }
+
+    create() {
+        this.background = this.add.image(512, 384, 'background');
+
+        this.title = this.add.text(512, 200, 'Ballz', {
+            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
+            stroke: '#000000', strokeThickness: 8,
+            align: 'center'
+        }).setOrigin(0.5);
+
+        this.descriptionText = this.add.text(512, GH - 100, '', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 4,
+            align: 'center'
+        }).setOrigin(0.5);
+
+        MENUS.forEach((menu, index) => {
+            const x = 512;
+            const y = 260 + (index + 1) * 50;
+            const menuItem = this.add.text(x, y, menu.title, {
+                fontFamily: 'Arial',
+                fontSize: '24px',
+                color: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 4
+            }).setOrigin(0.5);
+
+            menuItem.setInteractive({ useHandCursor: true });
+
+            menuItem.on('pointerover', () => {
+                menuItem.setColor('#ffcc00');
+                this.descriptionText.setText(menu.desc);
+            });
+
+            menuItem.on('pointerout', () => {
+                menuItem.setColor('#ffffff');
+                this.descriptionText.setText('');
+            });
+
+            menuItem.on('pointerdown', () => {
+                if (menu.scene === 'Exit') {
+                    this.game.destroy(true);
+                } else if (['Game', 'Campaign', 'Tutorial'].includes(menu.scene)) {
+                    this.scene.start(menu.scene, { mode: menu.title });
+                } else {
+                    this.descriptionText.setText(`[ ${menu.scene} ] is coming soon!`);
+                    this.cameras.main.shake(200, 0.01);
+                }
+            });
+        });
+
+    }
+}
