@@ -30,7 +30,8 @@ export class Preloader extends Scene
     preload ()
     {
         // Set path for other assets if any
-        this.load.setPath('assets');
+        this.load.setPath('img');
+        this.load.spritesheet('ball', 'ball.png', { frameWidth: 128, frameHeight: 128 });
     }
 
     create ()
@@ -213,7 +214,7 @@ export class Preloader extends Scene
 
         // Frame 8: Goal Portal (Vortex)
         {
-            const cx = 8 + 32;
+            const cx = 32;
             const cy = 128 + 32;
             ctx.beginPath();
             const portalGrad = ctx.createRadialGradient(cx, cy, 5, cx, cy, 25);
@@ -247,7 +248,7 @@ export class Preloader extends Scene
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             for (let i = 0; i < 3; i++) {
-                const sx = x + 8 + i * 24;
+                const sx = x + 8 + i * 16;
                 ctx.moveTo(sx, y + 56);
                 ctx.lineTo(sx + 12, y + 16);
                 ctx.lineTo(sx + 24, y + 56);

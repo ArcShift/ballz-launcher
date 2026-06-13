@@ -9,6 +9,7 @@ const MENUS = [
     { title: 'Settings', scene: 'Settings', desc: 'Settings' },
     { title: 'Map Editor', scene: 'MapEditor', desc: 'Create your own map' },
     { title: 'Credits', scene: 'Credits', desc: 'Credits' },
+    { title: 'Test', scene: 'Test', desc: 'Dev Test' },
 ]
 export class MainMenu extends Scene {
     background: GameObjects.Image;
@@ -64,7 +65,7 @@ export class MainMenu extends Scene {
             menuItem.on('pointerdown', () => {
                 if (menu.scene === 'Exit') {
                     this.game.destroy(true);
-                } else if (['Game', 'Campaign', 'Tutorial'].includes(menu.scene)) {
+                } else if (['Game', 'Campaign', 'Tutorial', 'Test'].includes(menu.scene)) {
                     this.scene.start(menu.scene, { mode: menu.title });
                 } else {
                     this.descriptionText.setText(`[ ${menu.scene} ] is coming soon!`);
