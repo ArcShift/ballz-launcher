@@ -3,6 +3,7 @@ import { GH } from '../main';
 
 const MENUS = [
     { title: 'Campaign', scene: 'Campaign', desc: 'Can you reach the end?' },
+    { title: 'Seed Game', scene: 'SeedGame', desc: 'Random Level Generator' },
     // { title: 'Endless', scene: 'Game', desc: 'There is no end... until you lose' },
     { title: 'Training', scene: 'Game', desc: 'You can test every balls here' },
     { title: 'Tutorial', scene: 'Tutorial', desc: 'Play Tutorial Scenario to learn how to play' },
@@ -65,7 +66,7 @@ export class MainMenu extends Scene {
             menuItem.on('pointerdown', () => {
                 if (menu.scene === 'Exit') {
                     this.game.destroy(true);
-                } else if (['Game', 'Campaign', 'Tutorial', 'Test'].includes(menu.scene)) {
+                } else if (['Game', 'SeedGame', 'Campaign', 'Tutorial', 'Test'].includes(menu.scene)) {
                     this.scene.start(menu.scene, { mode: menu.title });
                 } else {
                     this.descriptionText.setText(`[ ${menu.scene} ] is coming soon!`);
