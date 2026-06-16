@@ -179,9 +179,9 @@ export class CampaignSelection extends Scene {
         this.nextBtn.disableInteractive();
         if (this.currentPage < this.totalPages) this.nextBtn.setInteractive();
 
-        if (this.currentPage === 1) {
+        if (this.currentPage <= 2) {
             // Render the 3x3 level selection grid for Page 1
-            const startLevel = 1;
+            const startLevel = (this.currentPage - 1) * 9 + 1;
             const cols = 3;
             const rows = 3;
             const startX = GW / 2 - 220;
