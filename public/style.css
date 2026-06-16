@@ -1,3 +1,7 @@
+@font-face {
+    font-family: "Fredoka";
+    src: url('/font/Fredoka_SemiCondensed-Bold.ttf');
+}
 body {
     margin: 0;
     padding: 0;

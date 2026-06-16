@@ -25,14 +25,14 @@ export class MainMenu extends Scene {
     create() {
         this.background = this.add.image(512, 384, 'background');
 
-        this.title = this.add.text(512, 200, 'Ballz', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
+        this.title = this.add.text(512, 150, 'Ballz', {
+            fontFamily: 'Fredoka', fontSize: 38, color: '#ffffff',
             stroke: '#000000', strokeThickness: 8,
             align: 'center'
         }).setOrigin(0.5);
 
         this.descriptionText = this.add.text(512, GH - 100, '', {
-            fontFamily: 'Arial',
+            fontFamily: 'Fredoka',
             fontSize: '16px',
             color: '#ffffff',
             stroke: '#000000',
@@ -42,9 +42,9 @@ export class MainMenu extends Scene {
 
         MENUS.forEach((menu, index) => {
             const x = 512;
-            const y = 260 + (index + 1) * 50;
+            const y = 200 + (index + 1) * 50;
             const menuItem = this.add.text(x, y, menu.title, {
-                fontFamily: 'Arial',
+                fontFamily: 'Fredoka',
                 fontSize: '24px',
                 color: '#ffffff',
                 stroke: '#000000',
