@@ -3,14 +3,14 @@ import { GW, GH } from '../main';
 
 const MENUS = [
     { title: 'Campaign', scene: 'Campaign', desc: 'Can you reach the end?' },
-    { title: 'Seed Game', scene: 'SeedGame', desc: 'Random Level Generator' },
+    // { title: 'Seed Game', scene: 'SeedGame', desc: 'Random Level Generator' },
     // { title: 'Endless', scene: 'Game', desc: 'There is no end... until you lose' },
     { title: 'Training', scene: 'Game', desc: 'You can test every balls here' },
-    { title: 'Tutorial', scene: 'Tutorial', desc: 'Play Tutorial Scenario to learn how to play' },
-    { title: 'Settings', scene: 'Settings', desc: 'Settings' },
-    { title: 'Map Editor', scene: 'MapEditor', desc: 'Create your own map' },
-    { title: 'Credits', scene: 'Credits', desc: 'Credits' },
-    { title: 'Test', scene: 'Test', desc: 'Dev Test' },
+    // { title: 'Tutorial', scene: 'Tutorial', desc: 'Play Tutorial Scenario to learn how to play' },
+    // { title: 'Settings', scene: 'Settings', desc: 'Settings' },
+    // { title: 'Map Editor', scene: 'MapEditor', desc: 'Create your own map' },
+    // { title: 'Credits', scene: 'Credits', desc: 'Credits' },
+    // { title: 'Test', scene: 'Test', desc: 'Dev Test' },
 ]
 export class MainMenu extends Scene {
     background: GameObjects.Image;
