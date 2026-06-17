@@ -12,7 +12,6 @@ export class CampaignSelection extends Scene {
     private pageText: Phaser.GameObjects.Text;
     private prevBtn: Phaser.GameObjects.Text;
     private nextBtn: Phaser.GameObjects.Text;
-    private toBeContinuedText: Phaser.GameObjects.Text;
 
     constructor() {
         super('Campaign'); // Matches 'Campaign' scene key in MainMenu
@@ -151,21 +150,11 @@ export class CampaignSelection extends Scene {
             }
         });
 
-        // To Be Continued Text container (initially hidden)
-        this.toBeContinuedText = this.add.text(GW / 2, GH / 2 - 30, 'TO BE CONTINUED...', {
-            fontFamily: 'Arial Black',
-            fontSize: '48px',
-            color: '#ff3366',
-            stroke: '#000000',
-            strokeThickness: 10,
-            align: 'center'
-        }).setOrigin(0.5).setVisible(false);
     }
 
     private renderPage() {
         // Clear previous buttons
         this.levelButtons.clear(true, true);
-        this.toBeContinuedText.setVisible(false);
 
         // Update Page Indicator
         this.pageText.setText(`PAGE ${this.currentPage} / ${this.totalPages}`);
@@ -179,37 +168,23 @@ export class CampaignSelection extends Scene {
         this.nextBtn.disableInteractive();
         if (this.currentPage < this.totalPages) this.nextBtn.setInteractive();
 
-        if (this.currentPage <= 2) {
-            // Render the 3x3 level selection grid for Page 1
-            const startLevel = (this.currentPage - 1) * 9 + 1;
-            const cols = 3;
-            const rows = 3;
-            const startX = GW / 2 - 220;
-            const startY = 200;
-            const spacingX = 220;
-            const spacingY = 140;
+        // Render the 3x3 level selection grid for every page
+        const startLevel = (this.currentPage - 1) * 9 + 1;
+        const cols = 3;
+        const rows = 3;
+        const startX = GW / 2 - 220;
+        const startY = 200;
+        const spacingX = 220;
+        const spacingY = 140;
 
-            for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                    const levelIndex = startLevel + row * cols + col;
-                    const x = startX + col * spacingX;
-                    const y = startY + row * spacingY;
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const levelIndex = startLevel + row * cols + col;
+                const x = startX + col * spacingX;
+                const y = startY + row * spacingY;
 
-                    this.createLevelButton(x, y, levelIndex);
-                }
+                this.createLevelButton(x, y, levelIndex);
             }
-        } else {
-            // Other pages are "To Be Continued"
-            this.toBeContinuedText.setVisible(true);
-            
-            // Add sub-text
-            const sub = this.add.text(GW / 2, GH / 2 + 40, `Page ${this.currentPage} contents are locked.\nComplete Page 1 stages first!`, {
-                fontFamily: 'Arial',
-                fontSize: '18px',
-                color: '#aaaaaa',
-                align: 'center'
-            }).setOrigin(0.5);
-            this.levelButtons.add(sub);
         }
     }
 
