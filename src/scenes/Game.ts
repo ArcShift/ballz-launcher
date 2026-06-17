@@ -749,6 +749,10 @@ export class Game extends Scene {
             starsData[this.levelNum] = Math.max(oldStars, this.starsCollected);
             
             localStorage.setItem('ballz_campaign_stars', JSON.stringify(starsData));
+
+            // Remember which page this level belongs to, so Campaign Selection restores it
+            const page = Math.ceil(this.levelNum / 9);
+            localStorage.setItem('ballz_campaign_page', String(page));
         } catch (e) {
             console.error('Error saving stars score:', e);
         }

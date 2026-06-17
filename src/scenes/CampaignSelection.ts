@@ -2,6 +2,8 @@ import { Scene } from 'phaser';
 import { GW, GH } from '../main';
 import { playSound } from './Preloader';
 
+//global saved page
+export var savedPage = 1;
 export class CampaignSelection extends Scene {
     private currentPage: number = 1;
     private totalPages: number = 11;
@@ -18,7 +20,6 @@ export class CampaignSelection extends Scene {
     }
 
     init() {
-        this.currentPage = 1;
         this.loadProgress();
     }
 
@@ -58,15 +59,15 @@ export class CampaignSelection extends Scene {
 
     private loadProgress() {
         try {
-            const data = localStorage.getItem('ballz_campaign_stars');
-            if (data) {
-                this.starsData = JSON.parse(data);
-            } else {
-                this.starsData = {};
-            }
+            const starsRaw = localStorage.getItem('ballz_campaign_stars');
+            this.starsData = starsRaw ? JSON.parse(starsRaw) : {};
+
+            savedPage = parseInt(localStorage.getItem('ballz_campaign_page') || '1', 10);
+            this.currentPage = (savedPage >= 1 && savedPage <= this.totalPages) ? savedPage : 1;
         } catch (e) {
             console.error('Error loading progress:', e);
             this.starsData = {};
+            this.currentPage = 1;
         }
     }
 
@@ -102,7 +103,9 @@ export class CampaignSelection extends Scene {
             playSound(this, 'destroy');
             if (confirm('Are you sure you want to reset all campaign progress?')) {
                 localStorage.removeItem('ballz_campaign_stars');
+                localStorage.removeItem('ballz_campaign_page');
                 this.starsData = {};
+                this.currentPage = 1;
                 this.renderPage();
             }
         });
