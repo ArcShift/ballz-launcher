@@ -13,6 +13,7 @@ import { MainMenu } from './scenes/MainMenu';
 import { CampaignSelection } from './scenes/CampaignSelection';
 import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
+import { MapEditor } from './scenes/MapEditor';
 import * as Phaser from 'phaser';
 
 //  Find out more information about the Game Config at:
@@ -45,7 +46,8 @@ const config: Phaser.Types.Core.GameConfig = {
         MainMenu,
         CampaignSelection,
         MainGame,
-        GameOver
+        GameOver,
+        MapEditor
     ],
     callbacks: {
         postBoot: function (game: Phaser.Game) {

@@ -4,7 +4,7 @@ import { playSound } from './Preloader';
 import * as Phaser from 'phaser';
 import { LEVELS } from '../entities/Level';
 import { LevelData } from '../entities/Level';
-
+//can't access property "drawImage", this.data is null
 const BALL_INFO = [
     { name: 'Normal Ball', desc: 'Standard weight and bounce.', frame: '0' },
     { name: 'Sticky Ball', desc: 'Sticks to green ceilings. Aim & launch again!', frame: '1' },
@@ -63,14 +63,18 @@ export class Game extends Scene {
     private trailEmitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
 
     private isTrainingMode: boolean = false;
+    private isCustomMode: boolean = false;
+    private customSlotIndex: number = 1;
 
     constructor() {
         super('Game');
     }
 
-    init(data: { level?: number; mode?: string }) {
+    init(data: { level?: number; mode?: string; levelData?: LevelData; customSlot?: number }) {
         this.isTrainingMode = data.mode === 'Training';
+        this.isCustomMode = data.mode === 'Custom';
         this.levelNum = data.level || 1;
+        this.customSlotIndex = data.customSlot || 1;
         
         if (this.isTrainingMode) {
             this.levelData = {
@@ -92,6 +96,8 @@ export class Game extends Scene {
                     { x: 500, y: 678 }
                 ]
             };
+        } else if (this.isCustomMode && data.levelData) {
+            this.levelData = data.levelData;
         } else {
             this.levelData = LEVELS[this.levelNum] || LEVELS[1];
         }
@@ -111,6 +117,9 @@ export class Game extends Scene {
     }
 
     create() {
+        this.uiStars = [];
+        this.uiBallsIcons = [];
+        
         // Enable world bounds collisions
         this.physics.world.setBounds(0, 0, GW, GH);
 
@@ -359,7 +368,8 @@ export class Game extends Scene {
         this.add.rectangle(GW / 2, 40, GW, 80, 0x000000, 0.4);
 
         // Level Title
-        this.uiTextLevel = this.add.text(40, 25, this.isTrainingMode ? 'TRAINING SANDBOX' : `STAGE ${this.levelNum}`, {
+        const titleText = this.isCustomMode ? `CUSTOM STAGE ${this.customSlotIndex}` : (this.isTrainingMode ? 'TRAINING SANDBOX' : `STAGE ${this.levelNum}`);
+        this.uiTextLevel = this.add.text(40, 25, titleText, {
             fontFamily: 'Arial Black',
             fontSize: '28px',
             color: '#00ffff',
@@ -405,7 +415,13 @@ export class Game extends Scene {
         resetBtn.on('pointerout', () => resetBtn.setColor('#ffffff'));
         resetBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            this.scene.restart();
+            if (this.isCustomMode) {
+                this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
+            } else if (this.isTrainingMode) {
+                this.scene.restart({ mode: 'Training' });
+            } else {
+                this.scene.restart({ level: this.levelNum });
+            }
         });
 
         const exitBtn = this.add.text(GW - 70, 25, '✖', {
@@ -420,7 +436,11 @@ export class Game extends Scene {
         exitBtn.on('pointerout', () => exitBtn.setColor('#ff4444'));
         exitBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            this.scene.start('Campaign');
+            if (this.isCustomMode) {
+                this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else {
+                this.scene.start('Campaign');
+            }
         });
 
         // Bottom Dashboard Panel
@@ -845,7 +865,10 @@ export class Game extends Scene {
 
         // If it's level 9 (last of page 1), next stage is not unlocked/available
         const isNextAvailable = LEVELS[this.levelNum + 1] !== undefined;
-        if (!isNextAvailable) {
+        
+        if (this.isCustomMode) {
+            nextBtn.setText('EDIT MAP').setColor('#00ffff');
+        } else if (!isNextAvailable) {
             nextBtn.setText('CAMPAIGN COMPLETED!').setColor('#ffaa00');
         }
 
@@ -853,7 +876,9 @@ export class Game extends Scene {
         nextBtn.on('pointerout', () => nextBtn.setScale(1.0));
         nextBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            if (isNextAvailable) {
+            if (this.isCustomMode) {
+                this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else if (isNextAvailable) {
                 this.scene.start('Game', { level: this.levelNum + 1 });
             } else {
                 this.scene.start('Campaign');
@@ -869,11 +894,19 @@ export class Game extends Scene {
             strokeThickness: 4
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
+        if (this.isCustomMode) {
+            selectBtn.setText('BACK TO EDITOR');
+        }
+
         selectBtn.on('pointerover', () => selectBtn.setColor('#ffcc00'));
         selectBtn.on('pointerout', () => selectBtn.setColor('#ffffff'));
         selectBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            this.scene.start('Campaign');
+            if (this.isCustomMode) {
+                this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else {
+                this.scene.start('Campaign');
+            }
         });
         this.winOverlay.add(selectBtn);
     }
@@ -913,7 +946,13 @@ export class Game extends Scene {
         retryBtn.on('pointerout', () => retryBtn.setScale(1.0));
         retryBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            this.scene.restart();
+            if (this.isCustomMode) {
+                this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
+            } else if (this.isTrainingMode) {
+                this.scene.restart({ mode: 'Training' });
+            } else {
+                this.scene.restart({ level: this.levelNum });
+            }
         });
         this.loseOverlay.add(retryBtn);
 
@@ -925,11 +964,19 @@ export class Game extends Scene {
             strokeThickness: 4
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
+        if (this.isCustomMode) {
+            selectBtn.setText('BACK TO EDITOR');
+        }
+
         selectBtn.on('pointerover', () => selectBtn.setColor('#ffcc00'));
         selectBtn.on('pointerout', () => selectBtn.setColor('#ffffff'));
         selectBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            this.scene.start('Campaign');
+            if (this.isCustomMode) {
+                this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else {
+                this.scene.start('Campaign');
+            }
         });
         this.loseOverlay.add(selectBtn);
     }
