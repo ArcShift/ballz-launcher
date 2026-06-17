@@ -2,6 +2,7 @@
     font-family: "Fredoka";
     src: url('/font/Fredoka_SemiCondensed-Bold.ttf');
 }
+
 body {
     margin: 0;
     padding: 0;
@@ -16,4 +17,16 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#fps-counter {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000;
 }

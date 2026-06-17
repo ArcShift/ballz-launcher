@@ -41,7 +41,26 @@ const config: Phaser.Types.Core.GameConfig = {
         CampaignSelection,
         MainGame,
         GameOver
-    ]
+    ],
+    callbacks: {
+        postBoot: function (game: Phaser.Game) {
+            const fpsTextElement = document.getElementById('fps-counter');
+            let lastUpdateTime = 0;
+            const updateInterval = 500;
+
+            game.events.on('poststep', () => {
+                const now = performance.now();
+
+                if (now - lastUpdateTime >= updateInterval) {
+                    const currentFps = Math.round(game.loop.actualFps);
+                    if (fpsTextElement) {
+                        fpsTextElement.innerText = `FPS: ${currentFps}`;
+                    }
+                    lastUpdateTime = now;
+                }
+            });
+        }
+    }
 };
 
 const StartGame = (parent: string) => {
