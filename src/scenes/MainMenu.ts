@@ -17,6 +17,7 @@ export class MainMenu extends Scene {
     logo: GameObjects.Image;
     title: GameObjects.Text;
     descriptionText: GameObjects.Text;
+    fullscreenButton: GameObjects.Text;
 
     constructor() {
         super('MainMenu');
@@ -40,6 +41,28 @@ export class MainMenu extends Scene {
             strokeThickness: 4,
             align: 'center'
         }).setOrigin(0.5);
+
+        // Add fullscreen button
+        this.fullscreenButton = this.add.text(GW - 30, 30, '⛶', {
+            fontFamily: 'Arial',
+            fontSize: '32px',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 4
+        }).setOrigin(0.5);
+
+        this.fullscreenButton.setInteractive({ useHandCursor: true });
+        this.fullscreenButton.on('pointerover', () => {
+            this.fullscreenButton.setColor('#ffcc00');
+        });
+
+        this.fullscreenButton.on('pointerout', () => {
+            this.fullscreenButton.setColor('#ffffff');
+        });
+
+        this.fullscreenButton.on('pointerdown', () => {
+            this.scale.toggleFullscreen();
+        });
 
         MENUS.forEach((menu, index) => {
             const x = 512;
