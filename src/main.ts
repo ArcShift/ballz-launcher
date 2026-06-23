@@ -11,6 +11,7 @@ import { GameOver } from './scenes/GameOver';
 import { Game as MainGame } from './scenes/Game';
 import { MainMenu } from './scenes/MainMenu';
 import { CampaignSelection } from './scenes/CampaignSelection';
+import { Tutorial } from './scenes/Tutorial';
 import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { MapEditor } from './scenes/MapEditor';
@@ -47,7 +48,8 @@ const config: Phaser.Types.Core.GameConfig = {
         CampaignSelection,
         MainGame,
         GameOver,
-        MapEditor
+        MapEditor,
+        Tutorial
     ],
     callbacks: {
         postBoot: function (game: Phaser.Game) {

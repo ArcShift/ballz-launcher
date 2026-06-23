@@ -6,9 +6,9 @@ const MENUS = [
     // { title: 'Seed Game', scene: 'SeedGame', desc: 'Random Level Generator' },
     // { title: 'Endless', scene: 'Game', desc: 'There is no end... until you lose' },
     { title: 'Training', scene: 'Game', desc: 'You can test every balls here' },
-    // { title: 'Tutorial', scene: 'Tutorial', desc: 'Play Tutorial Scenario to learn how to play' },
-    // { title: 'Settings', scene: 'Settings', desc: 'Settings' },
+    { title: 'Tutorial', scene: 'Tutorial', desc: 'Learn about how to play' },
     { title: 'Map Editor', scene: 'MapEditor', desc: 'Create your own map' },
+    // { title: 'Settings', scene: 'Settings', desc: 'Settings' },
     // { title: 'Credits', scene: 'Credits', desc: 'Credits' },
     // { title: 'Test', scene: 'Test', desc: 'Dev Test' },
 ]
