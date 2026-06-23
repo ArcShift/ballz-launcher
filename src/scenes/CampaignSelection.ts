@@ -88,27 +88,6 @@ export class CampaignSelection extends Scene {
             this.scene.start('MainMenu');
         });
 
-        // Reset Button
-        const resetBtn = this.add.text(GW - 120, 60, 'RESET ↺', {
-            fontFamily: 'Arial Black',
-            fontSize: '16px',
-            color: '#ff4444',
-            stroke: '#000000',
-            strokeThickness: 4
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-        resetBtn.on('pointerover', () => resetBtn.setColor('#ff8888'));
-        resetBtn.on('pointerout', () => resetBtn.setColor('#ff4444'));
-        resetBtn.on('pointerdown', () => {
-            playSound(this, 'destroy');
-            if (confirm('Are you sure you want to reset all campaign progress?')) {
-                localStorage.removeItem('ballz_campaign_stars');
-                localStorage.removeItem('ballz_campaign_page');
-                this.starsData = {};
-                this.currentPage = 1;
-                this.renderPage();
-            }
-        });
 
         // Previous Page Button
         this.prevBtn = this.add.text(320, GH - 100, '◀ PREV', {

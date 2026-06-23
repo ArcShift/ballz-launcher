@@ -15,6 +15,7 @@ import { Tutorial } from './scenes/Tutorial';
 import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { MapEditor } from './scenes/MapEditor';
+import { Settings } from './scenes/Settings';
 import * as Phaser from 'phaser';
 
 //  Find out more information about the Game Config at:
@@ -49,7 +50,8 @@ const config: Phaser.Types.Core.GameConfig = {
         MainGame,
         GameOver,
         MapEditor,
-        Tutorial
+        Tutorial,
+        Settings
     ],
     callbacks: {
         postBoot: function (game: Phaser.Game) {
