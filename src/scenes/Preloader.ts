@@ -2,13 +2,11 @@ import { Scene } from 'phaser';
 
 export class Preloader extends Scene
 {
-    constructor ()
-    {
+    constructor () {
         super('Preloader');
     }
 
-    init ()
-    {
+    init () {
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(512, 384, 'background');
 
@@ -27,11 +25,10 @@ export class Preloader extends Scene
         });
     }
 
-    preload ()
-    {
+    preload () {
         // Set path for other assets if any
         this.load.setPath('img');
-        this.load.spritesheet('ball', 'ball.png', { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('sprite', 'ball.png', { frameWidth: 128, frameHeight: 128 });
     }
 
     create ()

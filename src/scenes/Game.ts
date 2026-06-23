@@ -184,7 +184,7 @@ export class Game extends Scene {
 
         // Stars
         this.levelData.stars.forEach((s, idx) => {
-            const star = this.starsGroup.create(s.x, s.y, 'spritesheet', '10');
+            const star = this.starsGroup.create(s.x, s.y, 'sprite', '48').setScale(0.5);
             star.setData('index', idx);
             star.refreshBody();
         });
@@ -244,7 +244,7 @@ export class Game extends Scene {
                 this.uiStars[idx].setTint(0xffd700).setScale(1.2);
                 this.tweens.add({
                     targets: this.uiStars[idx],
-                    scale: 1.0,
+                    scale: 0.5,
                     duration: 200
                 });
             }
@@ -381,7 +381,7 @@ export class Game extends Scene {
         const starStartX = GW / 2 - 50;
         for (let i = 0; i < 3; i++) {
             const x = starStartX + i * 45;
-            const star = this.add.image(x, 40, 'spritesheet', '10').setScale(0.5).setTint(0x333333);
+            const star = this.add.image(x, 40, 'sprite', '48').setScale(0.25).setTint(0x333333);
             this.uiStars.push(star);
         }
 
@@ -848,7 +848,7 @@ export class Game extends Scene {
 
         for (let i = 0; i < 3; i++) {
             const x = starStartX + i * starSpacing;
-            const star = this.add.image(x, GH/2 - 20, 'spritesheet', '10').setScale(0.8);
+            const star = this.add.image(x, GH/2 - 20, 'sprite', '48').setScale(0.4);
             this.winOverlay.add(star);
             overlayStars.push(star);
         }

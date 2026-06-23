@@ -9,15 +9,15 @@ const PLAYABLE_ROWS = 10; // y: 0 to 9 (640px, starts at 80)
 const PLAYABLE_Y_OFFSET = 80;
 
 const TOOLS = [
-    { type: 11, name: 'Standard', frame: '11' },
-    { type: 12, name: 'Weak', frame: '12' },
-    { type: 13, name: 'Flammable', frame: '13' },
-    { type: 14, name: 'Sticky', frame: '14' },
-    { type: 9, name: 'Spike', frame: '9' },
-    { type: 10, name: 'Star', frame: '10' },
-    { type: 15, name: 'Launcher', frame: '15' },
-    { type: 8, name: 'Portal', frame: '8' },
-    { type: 0, name: 'Eraser', frame: '0' } // Custom handling
+    { type: 11, name: 'Standard',image: 'spritesheet', frame: '11', scale: 1 },
+    { type: 12, name: 'Weak',image: 'spritesheet', frame: '12', scale: 1 },
+    { type: 13, name: 'Flammable',image: 'spritesheet', frame: '13', scale: 1 },
+    { type: 14, name: 'Sticky',image: 'spritesheet', frame: '14', scale: 1 },
+    { type: 9, name: 'Spike',image: 'spritesheet', frame: '9', scale: 1 },
+    { type: 10, name: 'Star',image: 'sprite', frame: '48', scale: 0.5 },
+    { type: 15, name: 'Launcher',image: 'spritesheet', frame: '15', scale: 1 },
+    { type: 8, name: 'Portal',image: 'spritesheet', frame: '8', scale: 1 },
+    { type: 0, name: 'Eraser',image: 'spritesheet', frame: '0', scale: 1 } // Custom handling
 ];
 
 const BALL_TYPES = 8;
@@ -169,7 +169,7 @@ export class MapEditor extends Scene {
 
         // Render Stars
         this.levelData.stars.forEach(s => {
-            const sprite = this.add.sprite(s.x, s.y, 'spritesheet', '10');
+            const sprite = this.add.sprite(s.x, s.y, 'sprite', '48').setScale(0.5);
             this.gridObjects.set(`${s.x},${s.y}`, { type: 10, sprite });
         });
 
@@ -271,7 +271,7 @@ export class MapEditor extends Scene {
 
     private createSidebar() {
         const sidebarX = 832;
-        this.add.rectangle(sidebarX + 96, GH/2, 192, GH, 0x050a0f, 0.9);
+        this.add.rectangle(sidebarX + 96, 463, 192, GH, 0x050a0f, 0.9);
 
         // Palette Title
         this.add.text(sidebarX + 96, 110, 'PALETTE', {
@@ -294,7 +294,7 @@ export class MapEditor extends Scene {
                 // Eraser Icon
                 this.add.text(cx, cy, '✖', { fontFamily: 'Arial Black', fontSize: '24px', color: '#ff4444' }).setOrigin(0.5);
             } else {
-                this.add.sprite(cx, cy, 'spritesheet', tool.frame).setScale(0.6);
+                this.add.sprite(cx, cy, tool.image, tool.frame).setScale(0.6 * tool.scale);
             }
 
             bg.on('pointerdown', () => {
@@ -305,7 +305,7 @@ export class MapEditor extends Scene {
                 if (tool.type === 0) {
                     this.hoverPreview.setTexture('spritesheet', '0').setTint(0xff0000); // Red cross
                 } else {
-                    this.hoverPreview.setTexture('spritesheet', tool.frame).clearTint();
+                    this.hoverPreview.setTexture(tool.image, tool.frame).clearTint();
                 }
             });
 
@@ -467,7 +467,7 @@ export class MapEditor extends Scene {
 
         const tool = TOOLS.find(t => t.type === this.selectedToolType);
         if (tool) {
-            const sprite = this.add.sprite(cx, cy, 'spritesheet', tool.frame);
+            const sprite = this.add.sprite(cx, cy, tool.image, tool.frame);
             this.gridObjects.set(key, { type: this.selectedToolType, sprite });
             // Only play sound on fresh click, not drag to avoid spam, or play a quieter version
             // playSound(this, 'click'); 
