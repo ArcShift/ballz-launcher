@@ -201,7 +201,7 @@ export class MapEditor extends Scene {
         // Sidebar Divider
         const div = this.add.graphics();
         div.lineStyle(2, 0x00ffff, 0.8);
-        div.moveTo(832, 0);
+        div.moveTo(832, 80);
         div.lineTo(832, GH);
         div.strokePath();
     }

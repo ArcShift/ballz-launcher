@@ -27,6 +27,7 @@ export class Game extends Scene {
     private starsGroup: Phaser.Physics.Arcade.StaticGroup;
     private portal: Phaser.Physics.Arcade.StaticImage;
     private launcherSprite: Phaser.GameObjects.Image;
+    private readyBallSprite: Phaser.GameObjects.Image | null = null; // Ball shown on launcher before launch
 
     // Ball tracking
     private activeBalls: Phaser.Physics.Arcade.Sprite[] = [];
@@ -324,6 +325,15 @@ export class Game extends Scene {
         this.activeBallIndex = this.ballInventory[0];
         this.currentLaunchPos.set(this.levelData.launcher.x, this.levelData.launcher.y - 20);
 
+        // Show ball sprite sitting on the launcher
+        if (this.readyBallSprite) this.readyBallSprite.destroy();
+        this.readyBallSprite = this.add.image(
+            this.currentLaunchPos.x,
+            this.currentLaunchPos.y,
+            'spritesheet',
+            this.activeBallIndex.toString()
+        );
+
         // Update inventory UI
         this.updateInventoryUI();
 
@@ -599,6 +609,12 @@ export class Game extends Scene {
         playSound(this, 'launch');
         this.canLaunch = false;
 
+        // Destroy the visual preview ball — the real physics ball takes over
+        if (this.readyBallSprite) {
+            this.readyBallSprite.destroy();
+            this.readyBallSprite = null;
+        }
+
         // Reset ability locks
         this.isGravityReversed = false;
         this.hasDashed = false;
@@ -684,6 +700,21 @@ export class Game extends Scene {
 
     private drawAimTrajectory() {
         this.aimGraphics.clear();
+
+        // Move the ready ball sprite to follow the drag (slingshot pull-back)
+        if (this.readyBallSprite) {
+            const clampedDrag = Phaser.Math.Clamp(
+                Phaser.Math.Distance.Between(this.aimStartPos.x, this.aimStartPos.y, this.aimCurrentPos.x, this.aimCurrentPos.y),
+                0, 150
+            );
+            const dragAngle = Phaser.Math.Angle.Between(this.aimStartPos.x, this.aimStartPos.y, this.aimCurrentPos.x, this.aimCurrentPos.y);
+            const pullFactor = clampedDrag / 150; // 0..1
+            const maxPull = 40; // max visual pull-back in px
+            this.readyBallSprite.setPosition(
+                this.aimStartPos.x + Math.cos(dragAngle) * pullFactor * maxPull,
+                this.aimStartPos.y + Math.sin(dragAngle) * pullFactor * maxPull
+            );
+        }
 
         // Slingshot elastic band
         this.aimGraphics.lineStyle(4, 0x00ffff, 0.7);
