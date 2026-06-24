@@ -31,7 +31,7 @@ export class Preloader extends Scene
         this.load.spritesheet('sprite', 'ball.png', { frameWidth: 128, frameHeight: 128 });
     }
 
-    create ()
+    async create ()
     {
         // Generate spritesheet programmatically
         const canvas = document.createElement('canvas');
@@ -50,6 +50,11 @@ export class Preloader extends Scene
                 const index = y * 4 + x;
                 texture.add(index.toString(), 0, x * 64, y * 64, 64, 64);
             }
+        }
+
+        // Wait for font to load
+        if (document.fonts) {
+            await document.fonts.load('10pt "Fredoka"');
         }
 
         // Move to the MainMenu

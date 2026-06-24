@@ -92,9 +92,9 @@ export class Tutorial extends Scene {
         this.imagesGroup = this.add.group();
 
         // Buttons
-        const prevBtn = this.createButton(150, GH - 120, '◄ PREV', () => this.changePage(-1));
-        const nextBtn = this.createButton(GW - 150, GH - 120, 'NEXT ►', () => this.changePage(1));
-        const backBtn = this.createButton(GW / 2, GH - 40, 'BACK TO MENU', () => {
+        this.createButton(150, GH - 120, '◄ PREV', () => this.changePage(-1));
+        this.createButton(GW - 150, GH - 120, 'NEXT ►', () => this.changePage(1));
+        this.createButton(GW / 2, GH - 40, 'BACK TO MENU', () => {
             playSound(this, 'click');
             this.scene.start('MainMenu');
         }, '#ff4444', '#ff8888');
