@@ -1,5 +1,6 @@
 import { Scene, GameObjects } from 'phaser';
 import { GW, GH } from '../main';
+import { loadSettings } from './Settings';
 
 const MENUS = [
     { title: 'Campaign', scene: 'Campaign', desc: 'Can you reach the end?' },
@@ -26,6 +27,15 @@ export class MainMenu extends Scene {
     create() {
         this.background = this.add.image(GW / 2, GH / 2, 'background');
         this.background.setDisplaySize(GW, GH);
+
+        const settings = loadSettings();
+        this.registry.set('soundVolume', settings.soundVolume);
+        this.registry.set('musicVolume', settings.musicVolume);
+
+        if (!this.registry.get('musicStarted')) {
+            this.sound.play('main-theme', { loop: true, volume: settings.musicVolume });
+            this.registry.set('musicStarted', true);
+        }
 
         this.title = this.add.text(GW / 2, 150, 'Hyper Ballz', {
             fontFamily: 'Fredoka', fontSize: 50, color: '#ffffff',

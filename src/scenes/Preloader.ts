@@ -29,6 +29,9 @@ export class Preloader extends Scene
         // Set path for other assets if any
         this.load.setPath('img');
         this.load.spritesheet('sprite', 'ball.png', { frameWidth: 128, frameHeight: 128 });
+
+        this.load.setPath('music');
+        this.load.audio('main-theme', 'main-theme.mp3');
     }
 
     async create ()
@@ -404,10 +407,18 @@ export function playSound(scene: Phaser.Scene, type: 'bounce' | 'portal' | 'coll
         ctx.resume();
     }
 
+    const sv = scene.registry.get('soundVolume');
+    const masterVol = sv !== undefined ? sv : 0.8;
+    if (masterVol <= 0) return;
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = masterVol;
+
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(masterGain);
+    masterGain.connect(ctx.destination);
 
     const now = ctx.currentTime;
 

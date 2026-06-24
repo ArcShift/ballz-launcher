@@ -117,6 +117,7 @@ export class Settings extends Scene {
             onChange: (v) => {
                 this.settings.soundVolume = v;
                 saveSettings(this.settings);
+                this.registry.set('soundVolume', v);
             }
         });
 
@@ -130,6 +131,11 @@ export class Settings extends Scene {
             onChange: (v) => {
                 this.settings.musicVolume = v;
                 saveSettings(this.settings);
+                this.registry.set('musicVolume', v);
+                const music = this.sound.get('main-theme');
+                if (music) {
+                    (music as any).setVolume(v);
+                }
             }
         });
 
