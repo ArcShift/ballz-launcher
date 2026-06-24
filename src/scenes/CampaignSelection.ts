@@ -28,8 +28,8 @@ export class CampaignSelection extends Scene {
         this.add.image(512, 384, 'background');
 
         // Header Title
-        this.add.text(GW / 2, 70, 'CAMPAIGN STAGES', {
-            fontFamily: 'Arial Black',
+        this.add.text(GW / 2, 70, 'Campaign Stages', {
+            fontFamily: 'Fredoka',
             fontSize: '44px',
             color: '#00ffff',
             stroke: '#000000',
@@ -39,7 +39,7 @@ export class CampaignSelection extends Scene {
 
         // Subtitle/Instructions
         this.add.text(GW / 2, 120, 'Select a mission to begin', {
-            fontFamily: 'Arial',
+            fontFamily: 'Fredoka',
             fontSize: '18px',
             color: '#a0a0ff',
             stroke: '#000000',
@@ -74,7 +74,7 @@ export class CampaignSelection extends Scene {
     private createNavigation() {
         // Back Button
         const backBtn = this.add.text(120, 60, '◀ MENU', {
-            fontFamily: 'Arial Black',
+            fontFamily: 'Fredoka',
             fontSize: '20px',
             color: '#ffffff',
             stroke: '#000000',
@@ -91,7 +91,7 @@ export class CampaignSelection extends Scene {
 
         // Previous Page Button
         this.prevBtn = this.add.text(320, GH - 100, '◀ PREV', {
-            fontFamily: 'Arial Black',
+            fontFamily: 'Fredoka',
             fontSize: '24px',
             color: '#ffffff',
             stroke: '#000000',
@@ -108,7 +108,7 @@ export class CampaignSelection extends Scene {
 
         // Page Indicator Text
         this.pageText = this.add.text(GW / 2, GH - 100, `PAGE ${this.currentPage} / ${this.totalPages}`, {
-            fontFamily: 'Arial Black',
+            fontFamily: 'Fredoka',
             fontSize: '24px',
             color: '#00ffff',
             stroke: '#000000',
@@ -117,7 +117,7 @@ export class CampaignSelection extends Scene {
 
         // Next Page Button
         this.nextBtn = this.add.text(GW - 320, GH - 100, 'NEXT ▶', {
-            fontFamily: 'Arial Black',
+            fontFamily: 'Fredoka',
             fontSize: '24px',
             color: '#ffffff',
             stroke: '#000000',
@@ -188,7 +188,7 @@ export class CampaignSelection extends Scene {
             bgRect.setInteractive({ useHandCursor: true });
             
             const levelText = this.add.text(x, y - 20, `STAGE ${levelNum}`, {
-                fontFamily: 'Arial Black',
+                fontFamily: 'Fredoka',
                 fontSize: '22px',
                 color: '#ffffff',
                 stroke: '#000000',
@@ -237,7 +237,7 @@ export class CampaignSelection extends Scene {
             this.levelButtons.add(lockIcon);
 
             const lockedText = this.add.text(x, y + 20, 'LOCKED', {
-                fontFamily: 'Arial Black',
+                fontFamily: 'Fredoka',
                 fontSize: '14px',
                 color: '#555555'
             }).setOrigin(0.5);

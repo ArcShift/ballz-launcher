@@ -25,7 +25,7 @@ export class Game extends Scene {
     private blocksGroup: Phaser.Physics.Arcade.StaticGroup;
     private spikesGroup: Phaser.Physics.Arcade.StaticGroup;
     private starsGroup: Phaser.Physics.Arcade.StaticGroup;
-    private portal: Phaser.Physics.Arcade.StaticImage;
+    private portal: Phaser.Physics.Arcade.Image;
     private launcherSprite: Phaser.GameObjects.Image;
     private readyBallSprite: Phaser.GameObjects.Image | null = null; // Ball shown on launcher before launch
 
@@ -170,8 +170,10 @@ export class Game extends Scene {
 
         // Portal / Goal
         const gp = this.levelData.portal;
-        this.portal = this.physics.add.staticImage(gp.x, gp.y, 'spritesheet', '8');
-        this.portal.body.setCircle(20, 12, 12);
+        this.portal = this.physics.add.image(gp.x, gp.y, 'spritesheet', '8');
+        this.portal.setCircle(20, 12, 12);
+        (this.portal.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
+        (this.portal.body as Phaser.Physics.Arcade.Body).setImmovable(true);
         
         // Add subtle rotation to the portal
         this.tweens.add({
@@ -574,7 +576,7 @@ export class Game extends Scene {
                         angles.forEach(offsetAngle => {
                             const mini = this.physics.add.sprite(px, py, 'spritesheet', '7');
                             mini.setScale(0.5);
-                            mini.setCircle(10, 12, 12);
+                            mini.setCircle(20, 12, 12);
                             mini.setBounce(0.5);
                             mini.setCollideWorldBounds(true);
                             (mini.body as Phaser.Physics.Arcade.Body).onWorldBounds = true;
@@ -654,7 +656,7 @@ export class Game extends Scene {
             this.updateInventoryUI();
             
             ball = this.physics.add.sprite(this.currentLaunchPos.x, this.currentLaunchPos.y, 'spritesheet', this.activeBallIndex.toString());
-            ball.setCircle(20);
+            ball.setCircle(20, 12, 12);
             ball.setCollideWorldBounds(true);
             (ball.body as Phaser.Physics.Arcade.Body).onWorldBounds = true;
             this.activeBalls.push(ball);
