@@ -248,12 +248,8 @@ export class MapEditor extends Scene {
         clearBtn.on('pointerover', () => clearBtn.setColor('#ffddaa'));
         clearBtn.on('pointerout', () => clearBtn.setColor('#ffaa00'));
         clearBtn.on('pointerdown', () => {
-            playSound(this, 'destroy');
-            this.levelData.blocks = [];
-            this.levelData.spikes = [];
-            this.levelData.stars = [];
-            this.renderMap();
-            this.saveSlot();
+            playSound(this, 'click');
+            this.showClearConfirmation();
         });
 
         const exitBtn = this.add.text(GW - 50, 25, '✖', {
@@ -267,6 +263,55 @@ export class MapEditor extends Scene {
             this.saveSlot();
             this.scene.start('MainMenu');
         });
+    }
+
+    private showClearConfirmation() {
+        const overlay = this.add.container(0, 0).setDepth(1000);
+        
+        // Darken background (blocks inputs below)
+        const bg = this.add.rectangle(GW / 2, GH / 2, GW, GH, 0x000000, 0.8).setInteractive();
+        overlay.add(bg);
+
+        // Dialog box
+        const dialog = this.add.rectangle(GW / 2, GH / 2, 400, 200, 0x222222).setStrokeStyle(4, 0x00ffff);
+        overlay.add(dialog);
+
+        // Text
+        const text = this.add.text(GW / 2, GH / 2 - 40, 'Are you sure you want to\nCLEAR the map?', {
+            fontFamily: 'Arial Black', fontSize: '20px', color: '#ffffff', align: 'center'
+        }).setOrigin(0.5);
+        overlay.add(text);
+
+        // Yes Button
+        const yesBtn = this.add.text(GW / 2 - 80, GH / 2 + 40, 'YES', {
+            fontFamily: 'Arial Black', fontSize: '24px', color: '#ff4444'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        
+        yesBtn.on('pointerover', () => yesBtn.setColor('#ff8888'));
+        yesBtn.on('pointerout', () => yesBtn.setColor('#ff4444'));
+        yesBtn.on('pointerdown', () => {
+            playSound(this, 'destroy');
+            this.levelData.blocks = [];
+            this.levelData.spikes = [];
+            this.levelData.stars = [];
+            this.renderMap();
+            this.saveSlot();
+            overlay.destroy();
+        });
+        overlay.add(yesBtn);
+
+        // No Button
+        const noBtn = this.add.text(GW / 2 + 80, GH / 2 + 40, 'NO', {
+            fontFamily: 'Arial Black', fontSize: '24px', color: '#00ff66'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        
+        noBtn.on('pointerover', () => noBtn.setColor('#aaffaa'));
+        noBtn.on('pointerout', () => noBtn.setColor('#00ff66'));
+        noBtn.on('pointerdown', () => {
+            playSound(this, 'click');
+            overlay.destroy();
+        });
+        overlay.add(noBtn);
     }
 
     private createSidebar() {
