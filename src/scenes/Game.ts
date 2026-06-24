@@ -123,6 +123,17 @@ export class Game extends Scene {
         
         // Enable world bounds collisions
         this.physics.world.setBounds(0, 0, GW, GH);
+        this.physics.world.on('worldbounds', (body: Phaser.Physics.Arcade.Body, up: boolean, down: boolean, left: boolean, right: boolean) => {
+            let bounced = false;
+            if (down && body.velocity.y < -10) bounced = true;
+            if (up && body.velocity.y > 10) bounced = true;
+            if (left && body.velocity.x > 10) bounced = true;
+            if (right && body.velocity.x < -10) bounced = true;
+
+            if (bounced) {
+                playSound(this, 'bounce');
+            }
+        });
 
         // Background
         this.add.image(512, 384, 'background');
@@ -199,7 +210,15 @@ export class Game extends Scene {
             const blockType = block.getData('type');
             const ballFrame = ball.frame.name;
 
-            playSound(this, 'bounce');
+            let bounced = false;
+            if (ball.body.touching.down && ball.body.velocity.y < -10) bounced = true;
+            if (ball.body.touching.up && ball.body.velocity.y > 10) bounced = true;
+            if (ball.body.touching.left && ball.body.velocity.x > 10) bounced = true;
+            if (ball.body.touching.right && ball.body.velocity.x < -10) bounced = true;
+
+            if (bounced) {
+                playSound(this, 'bounce');
+            }
 
             // 1. Metal Ball (frame '4') breaks Weak Blocks (type 12)
             if (ballFrame === '4' && blockType === 12) {
@@ -558,6 +577,7 @@ export class Game extends Scene {
                             mini.setCircle(10, 12, 12);
                             mini.setBounce(0.5);
                             mini.setCollideWorldBounds(true);
+                            (mini.body as Phaser.Physics.Arcade.Body).onWorldBounds = true;
                             this.activeBalls.push(mini);
 
                             // Rotate velocity vector slightly
@@ -636,6 +656,7 @@ export class Game extends Scene {
             ball = this.physics.add.sprite(this.currentLaunchPos.x, this.currentLaunchPos.y, 'spritesheet', this.activeBallIndex.toString());
             ball.setCircle(20);
             ball.setCollideWorldBounds(true);
+            (ball.body as Phaser.Physics.Arcade.Body).onWorldBounds = true;
             this.activeBalls.push(ball);
 
             // Re-apply physics colliders to encompass new balls
