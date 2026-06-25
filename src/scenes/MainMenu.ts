@@ -14,7 +14,6 @@ const MENUS = [
     // { title: 'Test', scene: 'Test', desc: 'Dev Test' },
 ]
 export class MainMenu extends Scene {
-    background: GameObjects.Image;
     logo: GameObjects.Image;
     title: GameObjects.Text;
     descriptionText: GameObjects.Text;
@@ -25,8 +24,7 @@ export class MainMenu extends Scene {
     }
 
     create() {
-        this.background = this.add.image(GW / 2, GH / 2, 'background');
-        this.background.setDisplaySize(GW, GH);
+        this.add.image(GW / 2, GH / 2, 'background').setDisplaySize(GW, GH);
 
         const settings = loadSettings();
         this.registry.set('soundVolume', settings.soundVolume);

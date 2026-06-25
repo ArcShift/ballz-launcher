@@ -137,7 +137,7 @@ export class Game extends Scene {
         });
 
         // Background
-        this.add.image(512, 384, 'background');
+        this.add.image(GW/2, GH/2, 'background').setDisplaySize(GW, GH);
 
         // Create groups
         this.blocksGroup = this.physics.add.staticGroup();

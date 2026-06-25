@@ -59,7 +59,7 @@ export class MapEditor extends Scene {
         this.gridObjects.clear();
 
         // Background
-        this.add.image(512, 384, 'background');
+        this.add.image(GW / 2, GH / 2, 'background').setDisplaySize(GW, GH);
 
         // Layout boundaries
         this.drawGrid();

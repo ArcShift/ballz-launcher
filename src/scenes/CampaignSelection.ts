@@ -24,10 +24,8 @@ export class CampaignSelection extends Scene {
     }
 
     create() {
-        // Background
-        this.add.image(512, 384, 'background');
+        this.add.image(GW / 2, GH / 2, 'background').setDisplaySize(GW, GH);
 
-        // Header Title
         this.add.text(GW / 2, 70, 'Campaign Stages', {
             fontFamily: 'Fredoka',
             fontSize: '44px',
@@ -237,7 +235,7 @@ export class CampaignSelection extends Scene {
             this.levelButtons.add(lockIcon);
 
             const lockedText = this.add.text(x, y + 20, 'LOCKED', {
-                fontFamily: 'Fredoka',
+                fontFamily: 'Fredoka    ',
                 fontSize: '14px',
                 color: '#555555'
             }).setOrigin(0.5);
