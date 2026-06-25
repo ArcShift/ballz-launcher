@@ -59,6 +59,7 @@ export class Game extends Scene {
     private uiStars: Phaser.GameObjects.Image[] = [];
     private winOverlay: Phaser.GameObjects.Container;
     private loseOverlay: Phaser.GameObjects.Container;
+    private pauseMenu: Phaser.GameObjects.Container;
 
     // Particles
     private trailEmitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
@@ -416,63 +417,24 @@ export class Game extends Scene {
             this.uiStars.push(star);
         }
 
-        // Action controls
-        const recallBtn = this.add.text(GW - 280, 25, 'RECALL ⤶', {
+        // ── Hamburger menu button (top-right) ──────────────────────────────
+        const menuBtn = this.add.text(GW - 50, 25, '☰', {
             fontFamily: 'Arial Black',
-            fontSize: '18px',
-            color: '#ffaa00',
-            stroke: '#000000',
-            strokeThickness: 4
-        }).setInteractive({ useHandCursor: true });
-
-        recallBtn.on('pointerover', () => recallBtn.setColor('#ffdd55'));
-        recallBtn.on('pointerout', () => recallBtn.setColor('#ffaa00'));
-        recallBtn.on('pointerdown', () => {
-            playSound(this, 'click');
-            // Destroy all active balls and load next
-            const ballsCopy = [...this.activeBalls];
-            ballsCopy.forEach(b => this.destroyBall(b));
-        });
-
-        const resetBtn = this.add.text(GW - 160, 25, 'RETRY ↺', {
-            fontFamily: 'Arial Black',
-            fontSize: '18px',
+            fontSize: '28px',
             color: '#ffffff',
             stroke: '#000000',
             strokeThickness: 4
         }).setInteractive({ useHandCursor: true });
 
-        resetBtn.on('pointerover', () => resetBtn.setColor('#ffcc00'));
-        resetBtn.on('pointerout', () => resetBtn.setColor('#ffffff'));
-        resetBtn.on('pointerdown', () => {
+        menuBtn.on('pointerover', () => menuBtn.setColor('#00ffff'));
+        menuBtn.on('pointerout', () => menuBtn.setColor('#ffffff'));
+        menuBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            if (this.isCustomMode) {
-                this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
-            } else if (this.isTrainingMode) {
-                this.scene.restart({ mode: 'Training' });
-            } else {
-                this.scene.restart({ level: this.levelNum });
-            }
+            this.togglePauseMenu(true);
         });
 
-        const exitBtn = this.add.text(GW - 70, 25, '✖', {
-            fontFamily: 'Arial Black',
-            fontSize: '24px',
-            color: '#ff4444',
-            stroke: '#000000',
-            strokeThickness: 4
-        }).setInteractive({ useHandCursor: true });
-
-        exitBtn.on('pointerover', () => exitBtn.setColor('#ff8888'));
-        exitBtn.on('pointerout', () => exitBtn.setColor('#ff4444'));
-        exitBtn.on('pointerdown', () => {
-            playSound(this, 'click');
-            if (this.isCustomMode) {
-                this.scene.start('MapEditor', { slot: this.customSlotIndex });
-            } else {
-                this.scene.start('Campaign');
-            }
-        });
+        // ── Pause popup menu ───────────────────────────────────────────────
+        this.createPauseMenu();
 
         // Bottom Dashboard Panel
         this.add.rectangle(GW / 2, GH - 40, GW, 80, 0x000000, 0.6);
@@ -503,6 +465,7 @@ export class Game extends Scene {
 
         // Lose Overlay
         this.createLoseOverlay();
+
     }
 
     private setupInputs() {
@@ -702,6 +665,11 @@ export class Game extends Scene {
                     allStopped = false;
                 }
 
+                // Reduce friction when ball is touching the ground
+                if (ball.body.blocked.down || ball.body.touching.down) {
+                    ball.body.velocity.x *= 0.95;
+                }
+
                 // If out of bounds or off the bottom of the screen, destroy
                 if (ball.y > GH - 10) {
                     this.destroyBall(ball);
@@ -871,6 +839,107 @@ export class Game extends Scene {
             alpha: 1,
             duration: 400
         });
+    }
+
+    // ── Pause / menu popup ─────────────────────────────────────────────────
+    private createPauseMenu() {
+        const pw = 340;
+        const ph = 280;
+        const cx = GW / 2;
+        const cy = GH / 2;
+
+        this.pauseMenu = this.add.container(0, 0).setVisible(false).setDepth(100);
+
+        // Dim full screen
+        const dimBg = this.add.rectangle(cx, cy, GW, GH, 0x000000, 0.65)
+            .setInteractive(); // blocks clicks through
+        this.pauseMenu.add(dimBg);
+
+        // Panel
+        const panel = this.add.rectangle(cx, cy, pw, ph, 0x0a1c28)
+            .setStrokeStyle(3, 0x00ffff);
+        this.pauseMenu.add(panel);
+
+        // Title
+        const title = this.add.text(cx, cy - 100, 'MENU', {
+            fontFamily: 'Arial Black',
+            fontSize: '26px',
+            color: '#00ffff',
+            stroke: '#000000',
+            strokeThickness: 5
+        }).setOrigin(0.5);
+        this.pauseMenu.add(title);
+
+        // Helper to build a menu row button
+        const makeBtn = (label: string, yOff: number, color: string, hoverColor: string, action: () => void) => {
+            const rowBg = this.add.rectangle(cx, cy + yOff, pw - 40, 46, 0x112233, 0.9)
+                .setStrokeStyle(1, 0x224455)
+                .setInteractive({ useHandCursor: true });
+            const rowText = this.add.text(cx, cy + yOff, label, {
+                fontFamily: 'Arial Black',
+                fontSize: '20px',
+                color: color,
+                stroke: '#000000',
+                strokeThickness: 4
+            }).setOrigin(0.5);
+
+            rowBg.on('pointerover', () => { rowBg.setFillStyle(0x1a3a55); rowText.setColor(hoverColor); });
+            rowBg.on('pointerout',  () => { rowBg.setFillStyle(0x112233); rowText.setColor(color); });
+            rowBg.on('pointerdown', () => { playSound(this, 'click'); action(); });
+
+            this.pauseMenu.add(rowBg);
+            this.pauseMenu.add(rowText);
+        };
+
+        // RECALL
+        makeBtn('⤶  RECALL BALL', -45, '#ffaa00', '#ffdd55', () => {
+            this.togglePauseMenu(false);
+            const ballsCopy = [...this.activeBalls];
+            ballsCopy.forEach(b => this.destroyBall(b));
+        });
+
+        // RETRY
+        makeBtn('↺  RETRY STAGE', 15, '#ffffff', '#ffcc00', () => {
+            this.togglePauseMenu(false);
+            if (this.isCustomMode) {
+                this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
+            } else if (this.isTrainingMode) {
+                this.scene.restart({ mode: 'Training' });
+            } else {
+                this.scene.restart({ level: this.levelNum });
+            }
+        });
+
+        // CLOSE / EXIT
+        makeBtn('✖  CLOSE STAGE', 75, '#ff4444', '#ff8888', () => {
+            this.togglePauseMenu(false);
+            if (this.isCustomMode) {
+                this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else {
+                this.scene.start('Campaign');
+            }
+        });
+
+        // Dismiss X
+        const closeX = this.add.text(cx + pw / 2 - 18, cy - ph / 2 + 10, '✕', {
+            fontFamily: 'Arial Black',
+            fontSize: '18px',
+            color: '#888888',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeX.on('pointerover', () => closeX.setColor('#ffffff'));
+        closeX.on('pointerout',  () => closeX.setColor('#888888'));
+        closeX.on('pointerdown', () => { playSound(this, 'click'); this.togglePauseMenu(false); });
+        this.pauseMenu.add(closeX);
+    }
+
+    private togglePauseMenu(show: boolean) {
+        this.pauseMenu.setVisible(show);
+        if (show) {
+            this.pauseMenu.setAlpha(0);
+            this.tweens.add({ targets: this.pauseMenu, alpha: 1, duration: 180 });
+        }
     }
 
     private createWinOverlay() {
