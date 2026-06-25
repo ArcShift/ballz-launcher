@@ -39,7 +39,7 @@ const config: Phaser.Types.Core.GameConfig = {
                 y: 600, // Enabled gravity for the physics puzzle gameplay!
                 x: 0
             },
-            debug: true
+            debug: import.meta.env.VITE_ENV === 'dev' ? true : false
         }
     },
     scene: [
