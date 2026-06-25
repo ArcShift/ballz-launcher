@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 import { Boot } from './scenes/Boot';
-import { GameOver } from './scenes/GameOver';
 import { Game as MainGame } from './scenes/Game';
 import { MainMenu } from './scenes/MainMenu';
 import { CampaignSelection } from './scenes/CampaignSelection';
@@ -48,7 +47,6 @@ const config: Phaser.Types.Core.GameConfig = {
         MainMenu,
         CampaignSelection,
         MainGame,
-        GameOver,
         MapEditor,
         Tutorial,
         Settings

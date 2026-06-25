@@ -4,7 +4,7 @@ import { LevelData } from '../entities/Level';
 import { playSound } from './Preloader';
 
 const GRID_SIZE = 64;
-const PLAYABLE_COLS = 13; // x: 0 to 12 (832px)
+const PLAYABLE_COLS = 16; // x: 0 to 15 (1024px)
 const PLAYABLE_ROWS = 10; // y: 0 to 9 (640px, starts at 80)
 const PLAYABLE_Y_OFFSET = 80;
 
@@ -197,17 +197,10 @@ export class MapEditor extends Scene {
         }
         
         graphics.strokePath();
-
-        // Sidebar Divider
-        const div = this.add.graphics();
-        div.lineStyle(2, 0x00ffff, 0.8);
-        div.moveTo(832, 80);
-        div.lineTo(832, GH);
-        div.strokePath();
     }
 
     private createTopBar() {
-        this.add.rectangle(GW / 2, 40, GW, 80, 0x000000, 0.6).setDepth(0);
+        this.add.rectangle(GW / 2, 40, GW, 80, 0x000000, 0.6).setDepth(0).setInteractive();
 
         this.add.text(20, 25, 'MAP EDITOR', {
             fontFamily: 'Arial Black', fontSize: '24px', color: '#00ffff'
@@ -314,14 +307,38 @@ export class MapEditor extends Scene {
         overlay.add(noBtn);
     }
 
+    private sidebarContainer: Phaser.GameObjects.Container;
+
     private createSidebar() {
+        this.sidebarContainer = this.add.container(0, 0).setDepth(100);
+        
         const sidebarX = 832;
-        this.add.rectangle(sidebarX + 96, 463, 192, GH, 0x050a0f, 0.9);
+        const bg = this.add.rectangle(sidebarX + 96, 463, 192, GH, 0x050a0f, 0.9).setInteractive();
+        this.sidebarContainer.add(bg);
+
+        // Toggle button
+        const toggleBtnBg = this.add.rectangle(sidebarX - 15, GH / 2, 30, 80, 0x00ffff).setInteractive({ useHandCursor: true });
+        const toggleBtnText = this.add.text(sidebarX - 15, GH / 2, '▶', { fontFamily: 'Arial Black', fontSize: '20px', color: '#000000' }).setOrigin(0.5);
+        this.sidebarContainer.add(toggleBtnBg);
+        this.sidebarContainer.add(toggleBtnText);
+
+        let isSidebarOpen = true;
+        toggleBtnBg.on('pointerdown', () => {
+            playSound(this, 'click');
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                toggleBtnText.setText('▶');
+                this.tweens.add({ targets: this.sidebarContainer, x: 0, duration: 200 });
+            } else {
+                toggleBtnText.setText('◀');
+                this.tweens.add({ targets: this.sidebarContainer, x: 192, duration: 200 });
+            }
+        });
 
         // Palette Title
-        this.add.text(sidebarX + 96, 110, 'PALETTE', {
+        this.sidebarContainer.add(this.add.text(sidebarX + 96, 110, 'PALETTE', {
             fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
         // 3x3 Grid for tools
         const cols = 3;
@@ -334,12 +351,13 @@ export class MapEditor extends Scene {
             const cy = startY + Math.floor(idx / cols) * spacing;
 
             const bg = this.add.rectangle(cx, cy, 50, 50, 0x112233).setInteractive({ useHandCursor: true });
+            this.sidebarContainer.add(bg);
             
             if (tool.type === 0) {
                 // Eraser Icon
-                this.add.text(cx, cy, '✖', { fontFamily: 'Arial Black', fontSize: '24px', color: '#ff4444' }).setOrigin(0.5);
+                this.sidebarContainer.add(this.add.text(cx, cy, '✖', { fontFamily: 'Arial Black', fontSize: '24px', color: '#ff4444' }).setOrigin(0.5));
             } else {
-                this.add.sprite(cx, cy, tool.image, tool.frame).setScale(0.6 * tool.scale);
+                this.sidebarContainer.add(this.add.sprite(cx, cy, tool.image, tool.frame).setScale(0.6 * tool.scale));
             }
 
             bg.on('pointerdown', () => {
@@ -360,9 +378,9 @@ export class MapEditor extends Scene {
         this.updateToolSelection();
 
         // Inventory Title
-        this.add.text(sidebarX + 96, 380, 'INVENTORY', {
+        this.sidebarContainer.add(this.add.text(sidebarX + 96, 380, 'INVENTORY', {
             fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5));
 
         // 2x4 Grid for balls
         const bCols = 2;
@@ -375,7 +393,7 @@ export class MapEditor extends Scene {
             const cx = bStartX + (i % bCols) * bSpacingX;
             const cy = bStartY + Math.floor(i / bCols) * bSpacingY;
 
-            this.add.sprite(cx, cy - 15, 'spritesheet', i.toString()).setScale(0.5);
+            this.sidebarContainer.add(this.add.sprite(cx, cy - 15, 'spritesheet', i.toString()).setScale(0.5));
 
             // Minus btn
             const minus = this.add.text(cx - 25, cy + 15, '[-]', { fontFamily: 'Arial Black', fontSize: '14px', color: '#ff4444' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -383,6 +401,8 @@ export class MapEditor extends Scene {
             const countText = this.add.text(cx, cy + 15, '0', { fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
             // Plus btn
             const plus = this.add.text(cx + 25, cy + 15, '[+]', { fontFamily: 'Arial Black', fontSize: '14px', color: '#00ff66' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+            this.sidebarContainer.add([minus, countText, plus]);
 
             minus.on('pointerdown', () => {
                 playSound(this, 'click');
@@ -432,8 +452,12 @@ export class MapEditor extends Scene {
     }
 
     private setupInput() {
-        this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-            if (pointer.x < 832 && pointer.y >= PLAYABLE_Y_OFFSET && pointer.y <= PLAYABLE_Y_OFFSET + PLAYABLE_ROWS * GRID_SIZE) {
+        this.input.on('pointermove', (pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+            if (currentlyOver.length > 0) {
+                this.hoverPreview.setVisible(false);
+                return;
+            }
+            if (pointer.x <= GW && pointer.y >= PLAYABLE_Y_OFFSET && pointer.y <= PLAYABLE_Y_OFFSET + PLAYABLE_ROWS * GRID_SIZE) {
                 const col = Math.floor(pointer.x / GRID_SIZE);
                 const row = Math.floor((pointer.y - PLAYABLE_Y_OFFSET) / GRID_SIZE);
                 
@@ -448,8 +472,9 @@ export class MapEditor extends Scene {
             }
         });
 
-        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            if (pointer.x < 832 && pointer.y >= PLAYABLE_Y_OFFSET && pointer.y <= PLAYABLE_Y_OFFSET + PLAYABLE_ROWS * GRID_SIZE) {
+        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+            if (currentlyOver.length > 0) return;
+            if (pointer.x <= GW && pointer.y >= PLAYABLE_Y_OFFSET && pointer.y <= PLAYABLE_Y_OFFSET + PLAYABLE_ROWS * GRID_SIZE) {
                 const col = Math.floor(pointer.x / GRID_SIZE);
                 const row = Math.floor((pointer.y - PLAYABLE_Y_OFFSET) / GRID_SIZE);
                 this.handleGridClick(col, row);
