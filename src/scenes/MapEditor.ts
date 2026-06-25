@@ -40,6 +40,14 @@ export class MapEditor extends Scene {
     private slotTabs: Phaser.GameObjects.Rectangle[] = [];
     private slotTexts: Phaser.GameObjects.Text[] = [];
 
+    // Sidebar state
+    private sidebarIsRight: boolean = true;  // true = right side, false = left side
+    private sidebarIsOpen: boolean = true;
+    private toggleBtnText: Phaser.GameObjects.Text;
+    private swapBtnText: Phaser.GameObjects.Text;
+    private toggleBtnBg: Phaser.GameObjects.Rectangle;
+    private swapBtnBg: Phaser.GameObjects.Rectangle;
+
     // Interaction
     private hoverPreview: Phaser.GameObjects.Sprite;
 
@@ -309,40 +317,63 @@ export class MapEditor extends Scene {
 
     private sidebarContainer: Phaser.GameObjects.Container;
 
+    // All sidebar children are positioned in LOCAL space (relative to container origin).
+    // When on the RIGHT: container.x = GW - SIDEBAR_W  (= 832)
+    // When on the LEFT:  container.x = 0
     private createSidebar() {
-        this.sidebarContainer = this.add.container(0, 0).setDepth(100);
-        
-        const sidebarX = 832;
-        const bg = this.add.rectangle(sidebarX + 96, 463, 192, GH, 0x050a0f, 0.9).setInteractive();
+        const SIDEBAR_W = 192;
+        const SIDEBAR_CENTER = SIDEBAR_W / 2; // 96 — horizontal center of sidebar
+
+        // Start on the right side
+        this.sidebarIsRight = true;
+        this.sidebarIsOpen = true;
+        this.sidebarContainer = this.add.container(GW - SIDEBAR_W, 0).setDepth(100);
+
+        // ── Background panel (local: fills 0..SIDEBAR_W) ─────────────────────
+        const bg = this.add.rectangle(SIDEBAR_CENTER, GH / 2, SIDEBAR_W, GH, 0x050a0f, 0.9).setInteractive();
         this.sidebarContainer.add(bg);
 
-        // Toggle button
-        const toggleBtnBg = this.add.rectangle(sidebarX - 15, GH / 2, 30, 80, 0x00ffff).setInteractive({ useHandCursor: true });
-        const toggleBtnText = this.add.text(sidebarX - 15, GH / 2, '▶', { fontFamily: 'Arial Black', fontSize: '20px', color: '#000000' }).setOrigin(0.5);
-        this.sidebarContainer.add(toggleBtnBg);
-        this.sidebarContainer.add(toggleBtnText);
+        // ── Toggle button (collapses/expands) ─────────────────────────────────
+        // Sits on the LEFT edge of the sidebar panel (local x = -15)
+        this.toggleBtnBg = this.add.rectangle(-15, GH / 2 - 50, 30, 70, 0x00ffff).setInteractive({ useHandCursor: true });
+        this.toggleBtnText = this.add.text(-15, GH / 2 - 50, '▶', {
+            fontFamily: 'Arial Black', fontSize: '16px', color: '#000000'
+        }).setOrigin(0.5);
+        this.sidebarContainer.add([this.toggleBtnBg, this.toggleBtnText]);
 
-        let isSidebarOpen = true;
-        toggleBtnBg.on('pointerdown', () => {
+        // ── Swap button (moves sidebar left ↔ right) ──────────────────────────
+        this.swapBtnBg = this.add.rectangle(-15, GH / 2 + 40, 30, 70, 0xffaa00).setInteractive({ useHandCursor: true });
+        this.swapBtnText = this.add.text(-15, GH / 2 + 40, '⇄', {
+            fontFamily: 'Arial Black', fontSize: '16px', color: '#000000'
+        }).setOrigin(0.5);
+        this.sidebarContainer.add([this.swapBtnBg, this.swapBtnText]);
+
+        this.toggleBtnBg.on('pointerdown', () => {
             playSound(this, 'click');
-            isSidebarOpen = !isSidebarOpen;
-            if (isSidebarOpen) {
-                toggleBtnText.setText('▶');
-                this.tweens.add({ targets: this.sidebarContainer, x: 0, duration: 200 });
-            } else {
-                toggleBtnText.setText('◀');
-                this.tweens.add({ targets: this.sidebarContainer, x: 192, duration: 200 });
-            }
+            this.sidebarIsOpen = !this.sidebarIsOpen;
+            this.applySidebarState(SIDEBAR_W);
         });
 
-        // Palette Title
-        this.sidebarContainer.add(this.add.text(sidebarX + 96, 110, 'PALETTE', {
+        this.swapBtnBg.on('pointerdown', () => {
+            playSound(this, 'click');
+            this.sidebarIsRight = !this.sidebarIsRight;
+            // Flip the toggle/swap buttons to the correct edge
+            const edgeX = this.sidebarIsRight ? -15 : SIDEBAR_W + 15;
+            this.toggleBtnBg.setPosition(edgeX, GH / 2 - 50);
+            this.toggleBtnText.setPosition(edgeX, GH / 2 - 50);
+            this.swapBtnBg.setPosition(edgeX, GH / 2 + 40);
+            this.swapBtnText.setPosition(edgeX, GH / 2 + 40);
+            this.applySidebarState(SIDEBAR_W);
+        });
+
+        // ── Palette Title ─────────────────────────────────────────────────────
+        this.sidebarContainer.add(this.add.text(SIDEBAR_CENTER, 110, 'PALETTE', {
             fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff'
         }).setOrigin(0.5));
 
-        // 3x3 Grid for tools
+        // ── 3×3 Tool Grid ─────────────────────────────────────────────────────
         const cols = 3;
-        const startX = sidebarX + 32;
+        const startX = 32;
         const startY = 160;
         const spacing = 64;
 
@@ -350,41 +381,39 @@ export class MapEditor extends Scene {
             const cx = startX + (idx % cols) * spacing;
             const cy = startY + Math.floor(idx / cols) * spacing;
 
-            const bg = this.add.rectangle(cx, cy, 50, 50, 0x112233).setInteractive({ useHandCursor: true });
-            this.sidebarContainer.add(bg);
-            
+            const toolBg = this.add.rectangle(cx, cy, 50, 50, 0x112233).setInteractive({ useHandCursor: true });
+            this.sidebarContainer.add(toolBg);
+
             if (tool.type === 0) {
-                // Eraser Icon
                 this.sidebarContainer.add(this.add.text(cx, cy, '✖', { fontFamily: 'Arial Black', fontSize: '24px', color: '#ff4444' }).setOrigin(0.5));
             } else {
                 this.sidebarContainer.add(this.add.sprite(cx, cy, tool.image, tool.frame).setScale(0.6 * tool.scale));
             }
 
-            bg.on('pointerdown', () => {
+            toolBg.on('pointerdown', () => {
                 playSound(this, 'click');
                 this.selectedToolType = tool.type;
                 this.updateToolSelection();
-                
                 if (tool.type === 0) {
-                    this.hoverPreview.setTexture('spritesheet', '0').setTint(0xff0000); // Red cross
+                    this.hoverPreview.setTexture('spritesheet', '0').setTint(0xff0000);
                 } else {
                     this.hoverPreview.setTexture(tool.image, tool.frame).clearTint();
                 }
             });
 
-            this.toolIcons.push(bg);
+            this.toolIcons.push(toolBg);
         });
 
         this.updateToolSelection();
 
-        // Inventory Title
-        this.sidebarContainer.add(this.add.text(sidebarX + 96, 380, 'INVENTORY', {
+        // ── Inventory Title ───────────────────────────────────────────────────
+        this.sidebarContainer.add(this.add.text(SIDEBAR_CENTER, 380, 'INVENTORY', {
             fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff'
         }).setOrigin(0.5));
 
-        // 2x4 Grid for balls
+        // ── 2×4 Ball Grid ─────────────────────────────────────────────────────
         const bCols = 2;
-        const bStartX = sidebarX + 48;
+        const bStartX = 48;
         const bStartY = 430;
         const bSpacingX = 96;
         const bSpacingY = 70;
@@ -395,26 +424,35 @@ export class MapEditor extends Scene {
 
             this.sidebarContainer.add(this.add.sprite(cx, cy - 15, 'spritesheet', i.toString()).setScale(0.5));
 
-            // Minus btn
             const minus = this.add.text(cx - 25, cy + 15, '[-]', { fontFamily: 'Arial Black', fontSize: '14px', color: '#ff4444' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-            // Count text
             const countText = this.add.text(cx, cy + 15, '0', { fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
-            // Plus btn
             const plus = this.add.text(cx + 25, cy + 15, '[+]', { fontFamily: 'Arial Black', fontSize: '14px', color: '#00ff66' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
             this.sidebarContainer.add([minus, countText, plus]);
 
-            minus.on('pointerdown', () => {
-                playSound(this, 'click');
-                this.adjustBallCount(i, -1);
-            });
-            plus.on('pointerdown', () => {
-                playSound(this, 'click');
-                this.adjustBallCount(i, 1);
-            });
+            minus.on('pointerdown', () => { playSound(this, 'click'); this.adjustBallCount(i, -1); });
+            plus.on('pointerdown', () => { playSound(this, 'click'); this.adjustBallCount(i, 1); });
 
             this.ballCountTexts.push(countText);
         }
+    }
+
+    /** Animate the sidebar container to its correct X position based on current state. */
+    private applySidebarState(sidebarW: number) {
+        const SIDEBAR_W = sidebarW;
+        let targetX: number;
+
+        if (this.sidebarIsOpen) {
+            // Visible: anchor to left or right edge
+            targetX = this.sidebarIsRight ? GW - SIDEBAR_W : 0;
+            this.toggleBtnText.setText(this.sidebarIsRight ? '▶' : '◀');
+        } else {
+            // Hidden: slide off the respective edge
+            targetX = this.sidebarIsRight ? GW : -SIDEBAR_W;
+            this.toggleBtnText.setText(this.sidebarIsRight ? '◀' : '▶');
+        }
+
+        this.tweens.add({ targets: this.sidebarContainer, x: targetX, duration: 200 });
     }
 
     private updateToolSelection() {
