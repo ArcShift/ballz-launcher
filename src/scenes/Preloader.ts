@@ -29,7 +29,7 @@ export class Preloader extends Scene
     preload () {
         // Set path for other assets if any
         this.load.setPath('img');
-        this.load.spritesheet('sprite', 'ball.png', { frameWidth: 64, frameHeight: 64 });
+        this.load.spritesheet('sprite', 'spritesheet.png', { frameWidth: 64, frameHeight: 64 });
 
         this.load.setPath('music');
         this.load.audio('main-theme', 'main-theme.mp3');

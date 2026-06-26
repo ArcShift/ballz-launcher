@@ -111,7 +111,7 @@ export const PAGE2_LEVELS: Record<number, LevelData> = {
     },
     14: {
         // Level 14: The Sticky Escape
-        balls: [1, 1, 6],
+        balls: [1, 1, 6, 3],
         launcher: { x: 100, y: 650 },
         portal: { x: 950, y: 150 },
         stars: [
