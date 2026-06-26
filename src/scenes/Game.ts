@@ -831,6 +831,13 @@ export class Game extends Scene {
     }
 
     private handleLevelLose() {
+        try {
+            const page = Math.ceil(this.levelNum / 9);
+            localStorage.setItem('ballz_campaign_page', String(page));
+        } catch (e) {
+            console.error('Error saving campaign page:', e);
+        }
+
         // Show lose overlay
         this.loseOverlay.setVisible(true);
         this.loseOverlay.setAlpha(0);
@@ -921,7 +928,7 @@ export class Game extends Scene {
         });
 
         // Dismiss X
-        const closeX = this.add.text(cx + pw / 2 - 18, cy - ph / 2 + 10, '✕', {
+        const closeX = this.add.text(cx + pw / 2 - 30, cy - ph / 2 + 40, '✕', {
             fontFamily: 'Arial Black',
             fontSize: '18px',
             color: '#888888',
