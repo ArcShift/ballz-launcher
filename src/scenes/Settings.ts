@@ -70,6 +70,8 @@ export class Settings extends Scene {
         const panelX = GW / 2 - panelW / 2;
         const panelY = GH / 2 - panelH / 2 + 20;
 
+        let yPos: number = panelY;
+
         const panelGfx = this.add.graphics();
         // Shadow
         panelGfx.fillStyle(0x000000, 0.35);
@@ -96,20 +98,17 @@ export class Settings extends Scene {
         // ── Divider under title ────────────────────────────────────────────
         const divGfx = this.add.graphics();
         divGfx.lineStyle(2, 0x00ffff, 0.4);
-        divGfx.lineBetween(panelX + 30, panelY + 56, panelX + panelW - 30, panelY + 56);
+        divGfx.lineBetween(panelX + 30, yPos += 56, panelX + panelW - 30, yPos);
 
         // ── Section labels & rows start position ──────────────────────────
         const col1 = panelX + 30;
         const col2 = panelX + panelW - 30;
-        let rowY = panelY + 80;
-        const rowGap = 76;
 
-        this.sectionLabel(col1, rowY - 4, '🔊  AUDIO');
+        this.sectionLabel(col1, yPos += 20, '🔊  AUDIO');
 
         // ── Sound Volume slider ────────────────────────────────────────────
-        rowY += 30;
         this.buildSlider({
-            x: col1, y: rowY,
+            x: col1, y: yPos += 34,
             width: panelW - 60,
             min: 0, max: 1,
             value: this.settings.soundVolume,
@@ -121,9 +120,8 @@ export class Settings extends Scene {
             }
         });
 
-        rowY += rowGap;
         this.buildSlider({
-            x: col1, y: rowY,
+            x: col1, y: yPos += 76,
             width: panelW - 60,
             min: 0, max: 1,
             value: this.settings.musicVolume,
@@ -140,44 +138,39 @@ export class Settings extends Scene {
         });
 
         // ── Section: Display ──────────────────────────────────────────────
-        rowY += rowGap + 10;
         const divGfx2 = this.add.graphics();
         divGfx2.lineStyle(1, 0x00ffff, 0.2);
-        divGfx2.lineBetween(col1, rowY - 14, col2, rowY - 14);
+        divGfx2.lineBetween(col1, yPos += 75, col2, yPos);
 
-        this.sectionLabel(col1, rowY - 4, '🖥  DISPLAY');
+        this.sectionLabel(col1, yPos+ 15, '🖥  DISPLAY');
 
-        rowY += 28;
-        this.buildToggleRow(col1, col2, rowY, 'Fullscreen Mode', this.settings.fullscreen,
+        this.buildToggleRow(col1, col2, yPos += 50, 'Fullscreen Mode', this.settings.fullscreen,
             (val) => {
                 this.settings.fullscreen = val;
                 saveSettings(this.settings);
                 this.scale.toggleFullscreen();
             }
         );
+        //TODO: Implement Later
+        
+        // this.buildToggleRow(col1, col2, yPos += 45, 'Show Trajectory', this.settings.showTrajectory,
+        //     (val) => {
+        //         this.settings.showTrajectory = val;
+        //         saveSettings(this.settings);
+        //     }
+        // );
 
-        rowY += rowGap - 14;
-        this.buildToggleRow(col1, col2, rowY, 'Show Trajectory', this.settings.showTrajectory,
-            (val) => {
-                this.settings.showTrajectory = val;
-                saveSettings(this.settings);
-            }
-        );
+        // // ── Section: Gameplay ─────────────────────────────────────────────
+        // const divGfx3 = this.add.graphics();
+        // divGfx3.lineStyle(1, 0x00ffff, 0.2);
+        // divGfx3.lineBetween(col1, yPos += 40, col2, yPos);
 
-        // ── Section: Gameplay ─────────────────────────────────────────────
-        rowY += rowGap - 10;
-        const divGfx3 = this.add.graphics();
-        divGfx3.lineStyle(1, 0x00ffff, 0.2);
-        divGfx3.lineBetween(col1, rowY - 14, col2, rowY - 14);
+        // this.sectionLabel(col1, yPos + 15, '🎮  GAMEPLAY');
 
-        this.sectionLabel(col1, rowY - 4, '🎮  GAMEPLAY');
-
-        rowY += 28;
-        this.buildGravityRow(col1, col2, rowY);
+        // this.buildGravityRow(col1, col2, yPos += 50);
 
         // ── Reset button ──────────────────────────────────────────────────
-        rowY += rowGap - 8;
-        this.buildTextButton(GW / 2 - 150, rowY, '↺  RESET SETTINGS', '#888888', '#ffaa00',
+        this.buildTextButton(GW / 2 - 150, yPos += 50, '↺  RESET SETTINGS', '#888888', '#ffaa00',
             () => {
                 this.settings = { ...DEFAULTS };
                 saveSettings(this.settings);
@@ -187,7 +180,7 @@ export class Settings extends Scene {
             }
         );
 
-        this.buildTextButton(GW / 2 + 150, rowY, '⚠  RESET CAMPAIGN', '#ff4444', '#ff8888',
+        this.buildTextButton(GW / 2 + 150, yPos, '⚠  RESET CAMPAIGN', '#ff4444', '#ff8888',
             () => {
                 playSound(this, 'destroy');
                 if (confirm('Are you sure you want to reset all campaign progress?')) {
