@@ -327,7 +327,7 @@ export class MapEditor extends Scene {
         // Start on the right side
         this.sidebarIsRight = true;
         this.sidebarIsOpen = true;
-        this.sidebarContainer = this.add.container(GW - SIDEBAR_W, 0).setDepth(100);
+        this.sidebarContainer = this.add.container(GW - SIDEBAR_W, 80).setDepth(100);
 
         // ── Background panel (local: fills 0..SIDEBAR_W) ─────────────────────
         const bg = this.add.rectangle(SIDEBAR_CENTER, GH / 2, SIDEBAR_W, GH, 0x050a0f, 0.9).setInteractive();
@@ -367,14 +367,14 @@ export class MapEditor extends Scene {
         });
 
         // ── Palette Title ─────────────────────────────────────────────────────
-        this.sidebarContainer.add(this.add.text(SIDEBAR_CENTER, 110, 'PALETTE', {
+        this.sidebarContainer.add(this.add.text(SIDEBAR_CENTER, 20, 'PALETTE', {
             fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff'
         }).setOrigin(0.5));
 
         // ── 3×3 Tool Grid ─────────────────────────────────────────────────────
         const cols = 3;
         const startX = 32;
-        const startY = 160;
+        const startY = 70;
         const spacing = 64;
 
         TOOLS.forEach((tool, idx) => {
