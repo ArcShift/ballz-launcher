@@ -30,6 +30,7 @@ export class Preloader extends Scene
         // Set path for other assets if any
         this.load.setPath('img');
         this.load.spritesheet('sprite', 'spritesheet.png', { frameWidth: 64, frameHeight: 64 });
+        this.load.image('button', 'button.png');
 
         this.load.setPath('music');
         this.load.audio('main-theme', 'main-theme.mp3');
@@ -38,7 +39,7 @@ export class Preloader extends Scene
     async create ()
     {
         // Generate spritesheet programmatically
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement('canvas');    
         canvas.width = 256;
         canvas.height = 256;
         

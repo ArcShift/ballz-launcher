@@ -73,29 +73,29 @@ export class MainMenu extends Scene {
         });
 
         MENUS.forEach((menu, index) => {
-            const x = 512;
-            const y = 200 + (index + 1) * 50;
-            const menuItem = this.add.text(x, y, menu.title, {
+            const x = GW / 2;
+            const y = 240 + index * 80;
+
+            const bg = this.add.image(x, y, 'button').setScale(0.3);
+
+            const text = this.add.text(x, y, menu.title, {
                 fontFamily: 'Fredoka',
-                fontSize: '24px',
-                color: '#ffffff',
+                fontSize: '22px',
+                color: '#ffffffff',
                 stroke: '#000000',
-                strokeThickness: 4
+                strokeThickness: 3
             }).setOrigin(0.5);
 
-            menuItem.setInteractive({ useHandCursor: true });
-
-            menuItem.on('pointerover', () => {
-                menuItem.setColor('#ffcc00');
+            bg.setInteractive({useHandCursor: true});
+            bg.on('pointerover', () => {
+                text.setColor('#ffcc00');
                 this.descriptionText.setText(menu.desc);
             });
-
-            menuItem.on('pointerout', () => {
-                menuItem.setColor('#ffffff');
+            bg.on('pointerout', () => {
+                text.setColor('#ffffff');
                 this.descriptionText.setText('');
             });
-
-            menuItem.on('pointerdown', () => {
+            bg.on('pointerdown', () => {
                 if (menu.scene === 'Exit') {
                     this.game.destroy(true);
                 } else if (['Game', 'SeedGame', 'Campaign', 'Tutorial', 'Test', 'MapEditor', 'Settings'].includes(menu.scene)) {
