@@ -199,7 +199,7 @@ export class Game extends Scene {
 
         // Stars
         this.levelData.stars.forEach((s, idx) => {
-            const star = this.starsGroup.create(s.x, s.y, 'sprite', '48').setScale(0.5);
+            const star = this.starsGroup.create(s.x, s.y, 'sprite', '48');
             star.setData('index', idx);
             star.refreshBody();
         });
@@ -413,7 +413,7 @@ export class Game extends Scene {
         const starStartX = GW / 2 - 50;
         for (let i = 0; i < 3; i++) {
             const x = starStartX + i * 45;
-            const star = this.add.image(x, 40, 'sprite', '48').setScale(0.25).setTint(0x333333);
+            const star = this.add.image(x, 40, 'sprite', '48').setScale(0.5).setTint(0x333333);
             this.uiStars.push(star);
         }
 
@@ -978,7 +978,7 @@ export class Game extends Scene {
 
         for (let i = 0; i < 3; i++) {
             const x = starStartX + i * starSpacing;
-            const star = this.add.image(x, GH/2 - 20, 'sprite', '48').setScale(0.4);
+            const star = this.add.image(x, GH/2 - 20, 'sprite', '48').setScale(0.8);
             this.winOverlay.add(star);
             overlayStars.push(star);
         }

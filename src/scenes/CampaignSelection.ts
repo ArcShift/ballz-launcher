@@ -202,7 +202,7 @@ export class CampaignSelection extends Scene {
                 const starX = starStartX + i * starSpacing;
                 const starY = y + 20;
 
-                const star = this.add.image(starX, starY, 'sprite', '48').setScale(0.2);
+                const star = this.add.image(starX, starY, 'sprite', '48').setScale(0.5);
                 if (i >= starsEarned) {
                     star.setTint(0x333333);
                 } else {

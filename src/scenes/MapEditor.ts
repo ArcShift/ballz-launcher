@@ -14,7 +14,7 @@ const TOOLS = [
     { type: 13, name: 'Flammable',image: 'spritesheet', frame: '13', scale: 1 },
     { type: 14, name: 'Sticky',image: 'spritesheet', frame: '14', scale: 1 },
     { type: 9, name: 'Spike',image: 'spritesheet', frame: '9', scale: 1 },
-    { type: 10, name: 'Star',image: 'sprite', frame: '48', scale: 0.5 },
+    { type: 10, name: 'Star',image: 'sprite', frame: '48', scale: 1 },
     { type: 15, name: 'Launcher',image: 'spritesheet', frame: '15', scale: 1 },
     { type: 8, name: 'Portal',image: 'spritesheet', frame: '8', scale: 1 },
     { type: 0, name: 'Eraser',image: 'spritesheet', frame: '0', scale: 1 } // Custom handling
@@ -177,7 +177,7 @@ export class MapEditor extends Scene {
 
         // Render Stars
         this.levelData.stars.forEach(s => {
-            const sprite = this.add.sprite(s.x, s.y, 'sprite', '48').setScale(0.5);
+            const sprite = this.add.sprite(s.x, s.y, 'sprite', '48');
             this.gridObjects.set(`${s.x},${s.y}`, { type: 10, sprite });
         });
 
