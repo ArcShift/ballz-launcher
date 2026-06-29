@@ -30,3 +30,120 @@ body {
     left: 0;
     z-index: 10000;
 }
+
+/* Premium Custom Overlays and Forms */
+.game-overlay-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    font-family: 'Fredoka', Arial, sans-serif;
+    animation: fadeIn 0.25s ease-out;
+}
+
+.game-dialog {
+    background: linear-gradient(135deg, #0a1c28 0%, #050d14 100%);
+    border: 3px solid #00ffff;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.35);
+    padding: 30px;
+    width: 420px;
+    text-align: center;
+    color: #ffffff;
+    box-sizing: border-box;
+    transform: scale(0.9);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.game-dialog-title {
+    font-size: 26px;
+    color: #00ffff;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    text-transform: uppercase;
+}
+
+.game-dialog-label {
+    display: block;
+    font-size: 14px;
+    color: #aaaaaa;
+    text-align: left;
+    margin-bottom: 8px;
+    margin-top: 15px;
+}
+
+.game-dialog-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #224455;
+    background: rgba(17, 34, 51, 0.8);
+    color: #ffffff;
+    font-size: 16px;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.game-dialog-input:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.25);
+    background: rgba(17, 34, 51, 0.95);
+}
+
+.game-dialog-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+    gap: 15px;
+}
+
+.game-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.game-btn-confirm {
+    background: #00ff66;
+    color: #000000;
+}
+
+.game-btn-confirm:hover {
+    background: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
+    transform: translateY(-2px);
+}
+
+.game-btn-cancel {
+    background: #ff4444;
+    color: #ffffff;
+}
+
+.game-btn-cancel:hover {
+    background: #ff8888;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+    transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popIn {
+    to { transform: scale(1); }
+}

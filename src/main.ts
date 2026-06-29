@@ -15,6 +15,7 @@ import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { MapEditor } from './scenes/MapEditor';
 import { Settings } from './scenes/Settings';
+import { CommunityMaps } from './scenes/CommunityMaps';
 import * as Phaser from 'phaser';
 
 //  Find out more information about the Game Config at:
@@ -49,7 +50,8 @@ const config: Phaser.Types.Core.GameConfig = {
         MainGame,
         MapEditor,
         Tutorial,
-        Settings
+        Settings,
+        CommunityMaps
     ],
     callbacks: {
         postBoot: function (game: Phaser.Game) {

@@ -9,6 +9,7 @@ const MENUS = [
     { title: 'Training', scene: 'Game', desc: 'You can test every balls here' },
     { title: 'Tutorial', scene: 'Tutorial', desc: 'Learn about how to play' },
     { title: 'Map Editor', scene: 'MapEditor', desc: 'Create your own map' },
+    { title: 'Community Maps', scene: 'CommunityMaps', desc: 'Play maps made by other players!' },
     { title: 'Settings', scene: 'Settings', desc: 'Settings' },
     // { title: 'Credits', scene: 'Credits', desc: 'Credits' },
     // { title: 'Test', scene: 'Test', desc: 'Dev Test' },
@@ -98,7 +99,7 @@ export class MainMenu extends Scene {
             bg.on('pointerdown', () => {
                 if (menu.scene === 'Exit') {
                     this.game.destroy(true);
-                } else if (['Game', 'SeedGame', 'Campaign', 'Tutorial', 'Test', 'MapEditor', 'Settings'].includes(menu.scene)) {
+                } else if (['Game', 'SeedGame', 'Campaign', 'Tutorial', 'Test', 'MapEditor', 'Settings', 'CommunityMaps'].includes(menu.scene)) {
                     this.scene.start(menu.scene, { mode: menu.title });
                 } else {
                     this.descriptionText.setText(`[ ${menu.scene} ] is coming soon!`);

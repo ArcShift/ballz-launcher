@@ -2,6 +2,8 @@ import { Scene } from 'phaser';
 import { GW, GH } from '../main';
 import { LevelData } from '../entities/Level';
 import { playSound } from './Preloader';
+import { saveMap } from '../services/supabase';
+import { getCrazyUser, happytime } from '../services/crazygames';
 
 const GRID_SIZE = 64;
 const PLAYABLE_COLS = 16; // x: 0 to 15 (1024px)
@@ -230,7 +232,7 @@ export class MapEditor extends Scene {
         }
 
         // Action Buttons
-        const playBtn = this.add.text(GW - 300, 25, '▶ PLAY TEST', {
+        const playBtn = this.add.text(GW - 420, 25, '▶ PLAY TEST', {
             fontFamily: 'Arial Black', fontSize: '18px', color: '#00ff66'
         }).setInteractive({ useHandCursor: true });
         
@@ -240,6 +242,18 @@ export class MapEditor extends Scene {
             playSound(this, 'launch');
             this.saveSlot();
             this.scene.start('Game', { mode: 'Custom', levelData: this.levelData, customSlot: this.currentSlot });
+        });
+
+        const shareBtn = this.add.text(GW - 280, 25, '📤 SHARE', {
+            fontFamily: 'Arial Black', fontSize: '18px', color: '#bb66ff'
+        }).setInteractive({ useHandCursor: true });
+        
+        shareBtn.on('pointerover', () => shareBtn.setColor('#ddbbff'));
+        shareBtn.on('pointerout', () => shareBtn.setColor('#bb66ff'));
+        shareBtn.on('pointerdown', () => {
+            playSound(this, 'click');
+            this.saveSlot();
+            this.showShareDialog();
         });
 
         const clearBtn = this.add.text(GW - 140, 25, 'CLEAR', {
@@ -263,6 +277,94 @@ export class MapEditor extends Scene {
             playSound(this, 'click');
             this.saveSlot();
             this.scene.start('MainMenu');
+        });
+    }
+
+    private async showShareDialog() {
+        if (this.levelData.blocks.length === 0 && this.levelData.spikes.length === 0 && this.levelData.stars.length === 0) {
+            alert('Cannot share an empty map! Please place some items first.');
+            return;
+        }
+
+        if (this.levelData.balls.length === 0) {
+            alert('Please add at least one ball to your inventory in the sidebar.');
+            return;
+        }
+
+        if (document.getElementById('share-modal')) return;
+
+        const cgUser = await getCrazyUser();
+        const defaultAuthor = cgUser ? cgUser.username : 'Guest';
+        const isGuest = !cgUser;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'share-modal';
+        overlay.className = 'game-overlay-container';
+
+        overlay.innerHTML = `
+            <div class="game-dialog">
+                <div class="game-dialog-title">Share Stage</div>
+                
+                <label class="game-dialog-label" for="share-title-input">Stage Name</label>
+                <input type="text" id="share-title-input" class="game-dialog-input" placeholder="Enter stage name..." maxlength="24" value="My Awesome Stage">
+                
+                <label class="game-dialog-label" for="share-author-input">Creator Name</label>
+                <input type="text" id="share-author-input" class="game-dialog-input" placeholder="Enter creator name..." maxlength="16" value="${defaultAuthor}" ${!isGuest ? 'disabled' : ''}>
+                ${!isGuest ? '<span style="font-size:10px; color:#00ff66; display:block; text-align:left; margin-top:4px;">Verified CrazyGames Account</span>' : ''}
+
+                <div class="game-dialog-buttons">
+                    <button id="share-btn-cancel" class="game-btn game-btn-cancel">Cancel</button>
+                    <button id="share-btn-publish" class="game-btn game-btn-confirm">Publish</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const titleInput = document.getElementById('share-title-input') as HTMLInputElement;
+        const authorInput = document.getElementById('share-author-input') as HTMLInputElement;
+        const cancelBtn = document.getElementById('share-btn-cancel') as HTMLButtonElement;
+        const publishBtn = document.getElementById('share-btn-publish') as HTMLButtonElement;
+
+        titleInput.focus();
+
+        const dismiss = () => {
+            overlay.remove();
+        };
+
+        cancelBtn.addEventListener('click', () => {
+            playSound(this, 'click');
+            dismiss();
+        });
+
+        publishBtn.addEventListener('click', async () => {
+            const title = titleInput.value.trim();
+            const author = authorInput.value.trim();
+
+            if (!title) {
+                alert('Please enter a stage name.');
+                return;
+            }
+            if (!author) {
+                alert('Please enter a creator name.');
+                return;
+            }
+
+            publishBtn.disabled = true;
+            publishBtn.innerText = 'Publishing...';
+
+            const { data, error } = await saveMap(title, author, cgUser ? cgUser.username : null, this.levelData);
+
+            if (error) {
+                alert('Failed to publish map: ' + error);
+                publishBtn.disabled = false;
+                publishBtn.innerText = 'Publish';
+            } else {
+                happytime();
+                playSound(this, 'collect');
+                alert('Stage published successfully to the Community list!');
+                dismiss();
+            }
         });
     }
 

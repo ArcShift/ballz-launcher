@@ -4,6 +4,8 @@ import { playSound } from './Preloader';
 import * as Phaser from 'phaser';
 import { LEVELS } from '../entities/Level';
 import { LevelData } from '../entities/Level';
+import { submitRating, submitComment, getMapComments, getPlayerRatingForMap } from '../services/supabase';
+import { getCrazyUser } from '../services/crazygames';
 //can't access property "drawImage", this.data is null
 const BALL_INFO = [
     { name: 'Normal Ball', desc: 'Standard weight and bounce.', frame: '0' },
@@ -67,16 +69,24 @@ export class Game extends Scene {
     private isTrainingMode: boolean = false;
     private isCustomMode: boolean = false;
     private customSlotIndex: number = 1;
+    private isCommunityMode: boolean = false;
+    private communityMapId: string | number = '';
+    private communityMapTitle: string = '';
+    private communityMapAuthor: string = '';
 
     constructor() {
         super('Game');
     }
 
-    init(data: { level?: number; mode?: string; levelData?: LevelData; customSlot?: number }) {
+    init(data: { level?: number; mode?: string; levelData?: LevelData; customSlot?: number; communityMapId?: string | number; communityMapTitle?: string; communityMapAuthor?: string }) {
         this.isTrainingMode = data.mode === 'Training';
         this.isCustomMode = data.mode === 'Custom';
+        this.isCommunityMode = data.mode === 'Community';
         this.levelNum = data.level || 1;
         this.customSlotIndex = data.customSlot || 1;
+        this.communityMapId = data.communityMapId || '';
+        this.communityMapTitle = data.communityMapTitle || '';
+        this.communityMapAuthor = data.communityMapAuthor || '';
         
         if (this.isTrainingMode) {
             this.levelData = {
@@ -99,6 +109,8 @@ export class Game extends Scene {
                 ]
             };
         } else if (this.isCustomMode && data.levelData) {
+            this.levelData = data.levelData;
+        } else if (this.isCommunityMode && data.levelData) {
             this.levelData = data.levelData;
         } else {
             this.levelData = LEVELS[this.levelNum] || LEVELS[1];
@@ -401,10 +413,12 @@ export class Game extends Scene {
         this.add.rectangle(GW / 2, 40, GW, 80, 0x000000, 0.4);
 
         // Level Title
-        const titleText = this.isCustomMode ? `CUSTOM STAGE ${this.customSlotIndex}` : (this.isTrainingMode ? 'TRAINING SANDBOX' : `STAGE ${this.levelNum}`);
+        const titleText = this.isCommunityMode 
+            ? `${this.communityMapTitle.toUpperCase()} by ${this.communityMapAuthor}` 
+            : (this.isCustomMode ? `CUSTOM STAGE ${this.customSlotIndex}` : (this.isTrainingMode ? 'TRAINING SANDBOX' : `STAGE ${this.levelNum}`));
         this.uiTextLevel = this.add.text(40, 25, titleText, {
             fontFamily: 'Arial Black',
-            fontSize: '28px',
+            fontSize: this.isCommunityMode ? '20px' : '28px', // Adjust font size for longer titles
             color: '#00ffff',
             stroke: '#000000',
             strokeThickness: 5
@@ -909,7 +923,15 @@ export class Game extends Scene {
         // RETRY
         makeBtn('↺  RETRY STAGE', 15, '#ffffff', '#ffcc00', () => {
             this.togglePauseMenu(false);
-            if (this.isCustomMode) {
+            if (this.isCommunityMode) {
+                this.scene.restart({
+                    mode: 'Community',
+                    levelData: this.levelData,
+                    communityMapId: this.communityMapId,
+                    communityMapTitle: this.communityMapTitle,
+                    communityMapAuthor: this.communityMapAuthor
+                });
+            } else if (this.isCustomMode) {
                 this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
             } else if (this.isTrainingMode) {
                 this.scene.restart({ mode: 'Training' });
@@ -921,7 +943,9 @@ export class Game extends Scene {
         // CLOSE / EXIT
         makeBtn('✖  CLOSE STAGE', 75, '#ff4444', '#ff8888', () => {
             this.togglePauseMenu(false);
-            if (this.isCustomMode) {
+            if (this.isCommunityMode) {
+                this.scene.start('CommunityMaps');
+            } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
             } else {
                 this.scene.start('Campaign');
@@ -997,7 +1021,9 @@ export class Game extends Scene {
         // If it's level 9 (last of page 1), next stage is not unlocked/available
         const isNextAvailable = LEVELS[this.levelNum + 1] !== undefined;
         
-        if (this.isCustomMode) {
+        if (this.isCommunityMode) {
+            nextBtn.setText('BACK TO LIST').setColor('#00ff66');
+        } else if (this.isCustomMode) {
             nextBtn.setText('EDIT MAP').setColor('#00ffff');
         } else if (!isNextAvailable) {
             nextBtn.setText('CAMPAIGN COMPLETED!').setColor('#ffaa00');
@@ -1007,7 +1033,9 @@ export class Game extends Scene {
         nextBtn.on('pointerout', () => nextBtn.setScale(1.0));
         nextBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            if (this.isCustomMode) {
+            if (this.isCommunityMode) {
+                this.scene.start('CommunityMaps');
+            } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
             } else if (isNextAvailable) {
                 this.scene.start('Game', { level: this.levelNum + 1 });
@@ -1025,15 +1053,19 @@ export class Game extends Scene {
             strokeThickness: 4
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        if (this.isCustomMode) {
+        if (this.isCommunityMode) {
+            selectBtn.setText('⭐ RATE & COMMENT').setColor('#ffaa00');
+        } else if (this.isCustomMode) {
             selectBtn.setText('BACK TO EDITOR');
         }
 
         selectBtn.on('pointerover', () => selectBtn.setColor('#ffcc00'));
-        selectBtn.on('pointerout', () => selectBtn.setColor('#ffffff'));
+        selectBtn.on('pointerout', () => selectBtn.setColor(this.isCommunityMode ? '#ffaa00' : '#ffffff'));
         selectBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            if (this.isCustomMode) {
+            if (this.isCommunityMode) {
+                this.showRateCommentDialog();
+            } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
             } else {
                 this.scene.start('Campaign');
@@ -1077,7 +1109,15 @@ export class Game extends Scene {
         retryBtn.on('pointerout', () => retryBtn.setScale(1.0));
         retryBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            if (this.isCustomMode) {
+            if (this.isCommunityMode) {
+                this.scene.restart({
+                    mode: 'Community',
+                    levelData: this.levelData,
+                    communityMapId: this.communityMapId,
+                    communityMapTitle: this.communityMapTitle,
+                    communityMapAuthor: this.communityMapAuthor
+                });
+            } else if (this.isCustomMode) {
                 this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
             } else if (this.isTrainingMode) {
                 this.scene.restart({ mode: 'Training' });
@@ -1095,7 +1135,9 @@ export class Game extends Scene {
             strokeThickness: 4
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        if (this.isCustomMode) {
+        if (this.isCommunityMode) {
+            selectBtn.setText('BACK TO LIST');
+        } else if (this.isCustomMode) {
             selectBtn.setText('BACK TO EDITOR');
         }
 
@@ -1103,12 +1145,174 @@ export class Game extends Scene {
         selectBtn.on('pointerout', () => selectBtn.setColor('#ffffff'));
         selectBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            if (this.isCustomMode) {
+            if (this.isCommunityMode) {
+                this.scene.start('CommunityMaps');
+            } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
             } else {
                 this.scene.start('Campaign');
             }
         });
         this.loseOverlay.add(selectBtn);
+    }
+
+    private async showRateCommentDialog() {
+        if (document.getElementById('rate-comment-modal')) return;
+
+        const cgUser = await getCrazyUser();
+        const defaultAuthor = cgUser ? cgUser.username : 'Guest';
+        const isGuest = !cgUser;
+
+        // Fetch existing comments and user rating
+        const { data: comments } = await getMapComments(this.communityMapId);
+        
+        let userRating = 0;
+        if (cgUser) {
+            userRating = await getPlayerRatingForMap(this.communityMapId, cgUser.username) || 0;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'rate-comment-modal';
+        overlay.className = 'game-overlay-container';
+
+        overlay.innerHTML = `
+            <div class="game-dialog" style="width: 500px; max-height: 90vh; display: flex; flex-direction: column;">
+                <div class="game-dialog-title" style="margin-bottom:10px;">Rate & Comment</div>
+                <div style="font-size: 14px; color: #aaaaaa; margin-bottom: 20px;">
+                    Stage: <span style="color:#00ffff; font-weight:bold;">${this.communityMapTitle}</span> by ${this.communityMapAuthor}
+                </div>
+
+                <!-- Rating Stars -->
+                <div style="margin-bottom: 15px;">
+                    <span style="font-size: 14px; color: #aaaaaa; display: block; margin-bottom: 5px;">Your Rating:</span>
+                    <div id="stars-container" style="font-size: 32px; display: inline-flex; gap: 8px; justify-content: center; cursor: pointer; user-select: none;">
+                        <span class="star-node" data-value="1" style="color: #444; transition: transform 0.1s;">★</span>
+                        <span class="star-node" data-value="2" style="color: #444; transition: transform 0.1s;">★</span>
+                        <span class="star-node" data-value="3" style="color: #444; transition: transform 0.1s;">★</span>
+                        <span class="star-node" data-value="4" style="color: #444; transition: transform 0.1s;">★</span>
+                        <span class="star-node" data-value="5" style="color: #444; transition: transform 0.1s;">★</span>
+                    </div>
+                </div>
+
+                <!-- Add Comment -->
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label class="game-dialog-label" for="comment-author" style="margin-top: 0;">Your Name</label>
+                    <input type="text" id="comment-author" class="game-dialog-input" placeholder="Your name..." maxlength="16" value="${defaultAuthor}" ${!isGuest ? 'disabled' : ''} style="margin-bottom: 8px; padding: 8px 12px; font-size:14px;">
+                    
+                    <label class="game-dialog-label" for="comment-textarea" style="margin-top: 0;">Add a comment</label>
+                    <textarea id="comment-textarea" class="game-dialog-input" placeholder="Write a comment... (max 120 chars)" maxlength="120" style="resize: none; height: 60px; font-family: sans-serif; font-size: 14px; padding: 8px 12px;"></textarea>
+                </div>
+
+                <!-- Comments List -->
+                <div style="text-align: left; flex: 1; min-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; border: 1px solid #224455; margin-bottom: 20px; font-family: Arial, sans-serif;">
+                    <div style="font-weight: bold; font-size: 12px; color: #00ffff; border-bottom: 1px solid #224455; padding-bottom: 5px; margin-bottom: 8px; text-transform: uppercase;">
+                        Comments (${comments?.length || 0})
+                    </div>
+                    <div id="comments-list-box" style="display: flex; flex-direction: column; gap: 8px; max-height: 140px;">
+                        ${comments && comments.length > 0 ? comments.map(c => `
+                            <div style="border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                                    <span style="color: #00ff66; font-weight: bold;">${c.author}</span>
+                                    <span style="color: #777;">${new Date(c.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div style="font-size: 13px; color: #ddd; margin-top: 2px; word-break: break-word;">${c.comment}</div>
+                            </div>
+                        `).join('') : '<div style="color:#777; font-size:12px; text-align:center; padding-top:20px;">No comments yet.</div>'}
+                    </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="game-dialog-buttons" style="margin-top: 0;">
+                    <button id="rate-cancel" class="game-btn game-btn-cancel">Close</button>
+                    <button id="rate-submit" class="game-btn game-btn-confirm">Submit</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const stars = Array.from(overlay.querySelectorAll('.star-node')) as HTMLElement[];
+        const authorInput = document.getElementById('comment-author') as HTMLInputElement;
+        const commentTextarea = document.getElementById('comment-textarea') as HTMLTextAreaElement;
+        const cancelBtn = document.getElementById('rate-cancel') as HTMLButtonElement;
+        const submitBtn = document.getElementById('rate-submit') as HTMLButtonElement;
+
+        let selectedRating = userRating;
+
+        const updateStars = (val: number) => {
+            stars.forEach((s, idx) => {
+                if (idx < val) {
+                    s.style.color = '#ffd700';
+                    s.style.textShadow = '0 0 8px rgba(255, 215, 0, 0.6)';
+                } else {
+                    s.style.color = '#444';
+                    s.style.textShadow = 'none';
+                }
+            });
+        };
+
+        updateStars(selectedRating);
+
+        stars.forEach((s, idx) => {
+            s.addEventListener('mouseenter', () => updateStars(idx + 1));
+            s.addEventListener('mouseleave', () => updateStars(selectedRating));
+            s.addEventListener('click', () => {
+                playSound(this, 'click');
+                selectedRating = idx + 1;
+                updateStars(selectedRating);
+            });
+        });
+
+        const dismiss = () => {
+            overlay.remove();
+        };
+
+        cancelBtn.addEventListener('click', () => {
+            playSound(this, 'click');
+            dismiss();
+        });
+
+        submitBtn.addEventListener('click', async () => {
+            const author = authorInput.value.trim() || 'Guest';
+            const comment = commentTextarea.value.trim();
+
+            if (selectedRating === 0 && !comment) {
+                alert('Please select a star rating or write a comment before submitting.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Submitting...';
+
+            let ratingSuccess = true;
+            let commentSuccess = true;
+
+            if (selectedRating > 0 && selectedRating !== userRating) {
+                const uniqueUserId = cgUser ? cgUser.username : `guest-${Math.random().toString(36).substr(2, 9)}`;
+                const { error: ratingErr } = await submitRating(this.communityMapId, uniqueUserId, selectedRating);
+                if (ratingErr) {
+                    console.error('Rating error:', ratingErr);
+                    ratingSuccess = false;
+                }
+            }
+
+            if (comment) {
+                const { error: commentErr } = await submitComment(this.communityMapId, author, comment);
+                if (commentErr) {
+                    console.error('Comment error:', commentErr);
+                    commentSuccess = false;
+                }
+            }
+
+            if (!ratingSuccess || !commentSuccess) {
+                alert('Some of your submissions failed. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Submit';
+            } else {
+                playSound(this, 'collect');
+                alert('Thank you! Your feedback has been submitted.');
+                dismiss();
+            }
+        });
     }
 }

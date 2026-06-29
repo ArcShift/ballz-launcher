@@ -1,5 +1,6 @@
 import { GW, GH } from '../main';
 import { Scene } from 'phaser';
+import { initCrazyGames } from '../services/crazygames';
 
 export class Preloader extends Scene
 {
@@ -39,6 +40,9 @@ export class Preloader extends Scene
 
     async create ()
     {
+        // Initialize CrazyGames SDK
+        await initCrazyGames();
+
         // Generate spritesheet programmatically
         const canvas = document.createElement('canvas');    
         canvas.width = 256;
