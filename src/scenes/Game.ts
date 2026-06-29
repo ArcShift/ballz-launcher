@@ -137,6 +137,7 @@ export class Game extends Scene {
         });
 
         // Background
+        // this.add.image(GW/2, GH/2, 'darkSpace').setDisplaySize(GW, GH);
         this.add.image(GW/2, GH/2, 'background').setDisplaySize(GW, GH);
 
         // Create groups
