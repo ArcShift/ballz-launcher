@@ -56,7 +56,17 @@ export function isSDKAvailable(): boolean {
 export async function isUserAccountAvailable(): Promise<boolean> {
     if (!isSDKAvailable()) return false;
     try {
-        return await window.CrazyGames!.SDK.user.isUserAccountAvailable();
+        const user = window.CrazyGames!.SDK.user as any;
+        if (typeof user.isUserAccountAvailable === 'function') {
+            return await user.isUserAccountAvailable();
+        } else if (user.system && typeof user.system.isUserAccountAvailable === 'function') {
+            return await user.system.isUserAccountAvailable();
+        } else if (typeof user.isUserAccountAvailable === 'boolean') {
+            return user.isUserAccountAvailable;
+        } else {
+            console.warn('isUserAccountAvailable not found as a function on SDK.user. Assuming true to allow user auth flow attempt.');
+            return true; 
+        }
     } catch (e) {
         console.error('Error checking isUserAccountAvailable:', e);
         return false;
