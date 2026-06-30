@@ -173,7 +173,7 @@ export async function saveMap(
 
     try {
         const { data, error } = await supabase!
-            .from('ballz_maps')
+            .from('ballz_map')
             .insert({
                 title: mapTitle,
                 author: mapAuthor,
@@ -216,7 +216,7 @@ export async function getMaps(): Promise<{ data: OnlineMap[]; error: any }> {
     try {
         // Load maps from Supabase
         const { data: mapsData, error: mapsError } = await supabase!
-            .from('ballz_maps')
+            .from('ballz_map')
             .select('*')
             .order('created_at', { ascending: false });
 
@@ -228,7 +228,7 @@ export async function getMaps(): Promise<{ data: OnlineMap[]; error: any }> {
         for (const map of mapsData) {
             // Fetch rating count and average
             const { data: ratingData } = await supabase!
-                .from('ballz_ratings')
+                .from('ballz_rating')
                 .select('rating')
                 .eq('map_id', map.id);
 
@@ -237,7 +237,7 @@ export async function getMaps(): Promise<{ data: OnlineMap[]; error: any }> {
 
             // Fetch comment count
             const { count: commentCount } = await supabase!
-                .from('ballz_comments')
+                .from('ballz_comment')
                 .select('*', { count: 'exact', head: true })
                 .eq('map_id', map.id);
 
@@ -265,7 +265,7 @@ export async function getMapComments(mapId: string | number): Promise<{ data: Ma
 
     try {
         const { data, error } = await supabase!
-            .from('ballz_comments')
+            .from('ballz_comment')
             .select('*')
             .eq('map_id', mapId)
             .order('created_at', { ascending: false });
@@ -303,7 +303,7 @@ export async function submitComment(
 
     try {
         const { data, error } = await supabase!
-            .from('ballz_comments')
+            .from('ballz_comment')
             .insert({
                 map_id: mapId,
                 author: cleanAuthor,
@@ -342,7 +342,7 @@ export async function submitRating(
     try {
         // Upsert rating
         const { data, error } = await supabase!
-            .from('ballz_ratings')
+            .from('ballz_rating')
             .upsert(
                 { map_id: mapId, user_id: userId, rating },
                 { onConflict: 'map_id,user_id' }
@@ -368,7 +368,7 @@ export async function getPlayerRatingForMap(
 
     try {
         const { data, error } = await supabase!
-            .from('ballz_ratings')
+            .from('ballz_rating')
             .select('rating')
             .eq('map_id', mapId)
             .eq('user_id', userId)
