@@ -9,6 +9,7 @@ const GRID_SIZE = 64;
 const PLAYABLE_COLS = 16; // x: 0 to 15 (1024px)
 const PLAYABLE_ROWS = 10; // y: 0 to 9 (640px, starts at 80)
 const PLAYABLE_Y_OFFSET = 80;
+const ENABLE_COMMUNITY_MAPS = import.meta.env.VITE_ENABLE_COMMUNITY_MAPS === 'true';
 
 const TOOLS = [
     { type: 11, name: 'Standard',image: 'spritesheet', frame: '11', scale: 1 },
@@ -244,6 +245,7 @@ export class MapEditor extends Scene {
             this.scene.start('Game', { mode: 'Custom', levelData: this.levelData, customSlot: this.currentSlot });
         });
 
+        if (ENABLE_COMMUNITY_MAPS) {
         const shareBtn = this.add.text(GW - 280, 25, '📤 SHARE', {
             fontFamily: 'Arial Black', fontSize: '18px', color: '#bb66ff'
         }).setInteractive({ useHandCursor: true });
@@ -255,6 +257,7 @@ export class MapEditor extends Scene {
             this.saveSlot();
             this.showShareDialog();
         });
+    }
 
         const clearBtn = this.add.text(GW - 140, 25, 'CLEAR', {
             fontFamily: 'Arial Black', fontSize: '18px', color: '#ffaa00'

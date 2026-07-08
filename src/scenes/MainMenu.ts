@@ -2,6 +2,7 @@ import { Scene, GameObjects } from 'phaser';
 import { GW, GH } from '../main';
 import { loadSettings } from './Settings';
 
+const ENABLE_COMMUNITY_MAPS = import.meta.env.VITE_ENABLE_COMMUNITY_MAPS === 'true';
 const MENUS = [
     { title: 'Campaign', scene: 'Campaign', desc: 'Can you reach the end?' },
     { title: 'Seed Game', scene: 'SeedPreparation', desc: 'Random Level Generator or Play the seed you want' },
@@ -9,7 +10,7 @@ const MENUS = [
     { title: 'Training', scene: 'Game', desc: 'You can test every balls here' },
     { title: 'Tutorial', scene: 'Tutorial', desc: 'Learn about how to play' },
     { title: 'Map Editor', scene: 'MapEditor', desc: 'Create your own map' },
-    { title: 'Community Maps', scene: 'CommunityMaps', desc: 'Play maps made by other players!' },
+    ...(ENABLE_COMMUNITY_MAPS ? [{ title: 'Community Maps', scene: 'CommunityMaps', desc: 'Play maps made by other players!' }] : []),
     { title: 'Settings', scene: 'Settings', desc: 'Settings' },
     // { title: 'Credits', scene: 'Credits', desc: 'Credits' },
     // { title: 'Test', scene: 'Test', desc: 'Dev Test' },
