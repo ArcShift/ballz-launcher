@@ -4,7 +4,7 @@ import { loadSettings } from './Settings';
 
 const MENUS = [
     { title: 'Campaign', scene: 'Campaign', desc: 'Can you reach the end?' },
-    // { title: 'Seed Game', scene: 'SeedGame', desc: 'Random Level Generator' },
+    { title: 'Seed Game', scene: 'SeedPreparation', desc: 'Random Level Generator or Play the seed you want' },
     // { title: 'Endless', scene: 'Game', desc: 'There is no end... until you lose' },
     { title: 'Training', scene: 'Game', desc: 'You can test every balls here' },
     { title: 'Tutorial', scene: 'Tutorial', desc: 'Learn about how to play' },
@@ -99,7 +99,7 @@ export class MainMenu extends Scene {
             bg.on('pointerdown', () => {
                 if (menu.scene === 'Exit') {
                     this.game.destroy(true);
-                } else if (['Game', 'SeedGame', 'Campaign', 'Tutorial', 'Test', 'MapEditor', 'Settings', 'CommunityMaps'].includes(menu.scene)) {
+                } else if (['Game', 'SeedPreparation', 'Campaign', 'Tutorial', 'Test', 'MapEditor', 'Settings', 'CommunityMaps'].includes(menu.scene)) {
                     this.scene.start(menu.scene, { mode: menu.title });
                 } else {
                     this.descriptionText.setText(`[ ${menu.scene} ] is coming soon!`);

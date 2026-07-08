@@ -11,6 +11,8 @@ import { Game as MainGame } from './scenes/Game';
 import { MainMenu } from './scenes/MainMenu';
 import { CampaignSelection } from './scenes/CampaignSelection';
 import { Tutorial } from './scenes/Tutorial';
+import { SeedPreparation } from './scenes/SeedPreparation';
+import { SeedGame } from './scenes/SeedGame';
 import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { MapEditor } from './scenes/MapEditor';
@@ -48,6 +50,8 @@ const config: Phaser.Types.Core.GameConfig = {
         MainMenu,
         CampaignSelection,
         MainGame,
+        SeedPreparation,
+        SeedGame,
         MapEditor,
         Tutorial,
         Settings,

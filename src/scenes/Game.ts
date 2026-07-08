@@ -73,15 +73,22 @@ export class Game extends Scene {
     private communityMapId: string | number = '';
     private communityMapTitle: string = '';
     private communityMapAuthor: string = '';
+    
+    private isSeedMode: boolean = false;
+    private seedNum: number = 1;
+    private seedStr: string = '';
 
     constructor() {
         super('Game');
     }
 
-    init(data: { level?: number; mode?: string; levelData?: LevelData; customSlot?: number; communityMapId?: string | number; communityMapTitle?: string; communityMapAuthor?: string }) {
+    init(data: { level?: number; mode?: string; levelData?: LevelData; customSlot?: number; communityMapId?: string | number; communityMapTitle?: string; communityMapAuthor?: string; seed?: number; seedStr?: string }) {
         this.isTrainingMode = data.mode === 'Training';
         this.isCustomMode = data.mode === 'Custom';
         this.isCommunityMode = data.mode === 'Community';
+        this.isSeedMode = data.mode === 'Seed';
+        this.seedNum = data.seed || 1;
+        this.seedStr = data.seedStr || '';
         this.levelNum = data.level || 1;
         this.customSlotIndex = data.customSlot || 1;
         this.communityMapId = data.communityMapId || '';
@@ -111,6 +118,8 @@ export class Game extends Scene {
         } else if (this.isCustomMode && data.levelData) {
             this.levelData = data.levelData;
         } else if (this.isCommunityMode && data.levelData) {
+            this.levelData = typeof data.levelData === 'string' ? JSON.parse(data.levelData) : data.levelData;
+        } else if (this.isSeedMode && data.levelData) {
             this.levelData = data.levelData;
         } else {
             this.levelData = LEVELS[this.levelNum] || LEVELS[1];
@@ -415,7 +424,7 @@ export class Game extends Scene {
         // Level Title
         const titleText = this.isCommunityMode 
             ? `${this.communityMapTitle.toUpperCase()} by ${this.communityMapAuthor}` 
-            : (this.isCustomMode ? `CUSTOM STAGE ${this.customSlotIndex}` : (this.isTrainingMode ? 'TRAINING SANDBOX' : `STAGE ${this.levelNum}`));
+            : (this.isCustomMode ? `CUSTOM STAGE ${this.customSlotIndex}` : (this.isTrainingMode ? 'TRAINING SANDBOX' : (this.isSeedMode ? this.seedStr : `STAGE ${this.levelNum}`)));
         this.uiTextLevel = this.add.text(40, 25, titleText, {
             fontFamily: 'Arial Black',
             fontSize: this.isCommunityMode ? '20px' : '28px', // Adjust font size for longer titles
@@ -935,6 +944,8 @@ export class Game extends Scene {
                 this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
             } else if (this.isTrainingMode) {
                 this.scene.restart({ mode: 'Training' });
+            } else if (this.isSeedMode) {
+                this.scene.restart({ mode: 'Seed', seed: this.seedNum, seedStr: this.seedStr, levelData: this.levelData });
             } else {
                 this.scene.restart({ level: this.levelNum });
             }
@@ -947,6 +958,8 @@ export class Game extends Scene {
                 this.scene.start('CommunityMaps');
             } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else if (this.isSeedMode) {
+                this.scene.start('SeedPreparation');
             } else {
                 this.scene.start('Campaign');
             }
@@ -1025,6 +1038,8 @@ export class Game extends Scene {
             nextBtn.setText('BACK TO LIST').setColor('#00ff66');
         } else if (this.isCustomMode) {
             nextBtn.setText('EDIT MAP').setColor('#00ffff');
+        } else if (this.isSeedMode) {
+            nextBtn.setText('NEW SEED').setColor('#00ff66');
         } else if (!isNextAvailable) {
             nextBtn.setText('CAMPAIGN COMPLETED!').setColor('#ffaa00');
         }
@@ -1037,6 +1052,8 @@ export class Game extends Scene {
                 this.scene.start('CommunityMaps');
             } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else if (this.isSeedMode) {
+                this.scene.start('SeedPreparation');
             } else if (isNextAvailable) {
                 this.scene.start('Game', { level: this.levelNum + 1 });
             } else {
@@ -1057,6 +1074,8 @@ export class Game extends Scene {
             selectBtn.setText('⭐ RATE & COMMENT').setColor('#ffaa00');
         } else if (this.isCustomMode) {
             selectBtn.setText('BACK TO EDITOR');
+        } else if (this.isSeedMode) {
+            selectBtn.setText('BACK TO SEED PREP');
         }
 
         selectBtn.on('pointerover', () => selectBtn.setColor('#ffcc00'));
@@ -1067,6 +1086,8 @@ export class Game extends Scene {
                 this.showRateCommentDialog();
             } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else if (this.isSeedMode) {
+                this.scene.start('SeedPreparation');
             } else {
                 this.scene.start('Campaign');
             }
@@ -1121,6 +1142,8 @@ export class Game extends Scene {
                 this.scene.restart({ mode: 'Custom', levelData: this.levelData, customSlot: this.customSlotIndex });
             } else if (this.isTrainingMode) {
                 this.scene.restart({ mode: 'Training' });
+            } else if (this.isSeedMode) {
+                this.scene.restart({ mode: 'Seed', seed: this.seedNum, seedStr: this.seedStr, levelData: this.levelData });
             } else {
                 this.scene.restart({ level: this.levelNum });
             }
@@ -1139,6 +1162,8 @@ export class Game extends Scene {
             selectBtn.setText('BACK TO LIST');
         } else if (this.isCustomMode) {
             selectBtn.setText('BACK TO EDITOR');
+        } else if (this.isSeedMode) {
+            selectBtn.setText('BACK TO SEED PREP');
         }
 
         selectBtn.on('pointerover', () => selectBtn.setColor('#ffcc00'));
@@ -1149,6 +1174,8 @@ export class Game extends Scene {
                 this.scene.start('CommunityMaps');
             } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
+            } else if (this.isSeedMode) {
+                this.scene.start('SeedPreparation');
             } else {
                 this.scene.start('Campaign');
             }

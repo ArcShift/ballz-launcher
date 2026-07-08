@@ -33,6 +33,7 @@ export class Preloader extends Scene
         this.load.spritesheet('sprite', 'spritesheet.png', { frameWidth: 64, frameHeight: 64 });
         this.load.image('button', 'button.png');
         this.load.image('darkSpace', 'dark space.png');
+        this.load.image('ball_spritesheet', 'ball_spritesheet.png');
 
         this.load.setPath('music');
         this.load.audio('main-theme', 'main-theme.mp3');
