@@ -53,6 +53,7 @@ export class MapEditor extends Scene {
 
     // Interaction
     private hoverPreview: Phaser.GameObjects.Sprite;
+    private menuOverlay: Phaser.GameObjects.Container;
 
     constructor() {
         super('MapEditor');
@@ -83,6 +84,9 @@ export class MapEditor extends Scene {
 
         // Hover Preview
         this.hoverPreview = this.add.sprite(-100, -100, 'spritesheet', '11').setAlpha(0.5).setDepth(10);
+        
+        // Menu Overlay
+        this.createMenuOverlay();
 
         // Input setup
         this.setupInput();
@@ -232,55 +236,109 @@ export class MapEditor extends Scene {
             this.slotTexts.push(text);
         }
 
-        // Action Buttons
-        const playBtn = this.add.text(GW - 420, 25, '▶ PLAY TEST', {
-            fontFamily: 'Arial Black', fontSize: '18px', color: '#00ff66'
-        }).setInteractive({ useHandCursor: true });
+        // Menu Button
+        const menuBtn = this.add.text(GW - 30, 40, '☰ MENU', {
+            fontFamily: 'Arial Black', fontSize: '20px', color: '#00ffff', stroke: '#000000', strokeThickness: 4
+        }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
         
-        playBtn.on('pointerover', () => playBtn.setColor('#aaffaa'));
-        playBtn.on('pointerout', () => playBtn.setColor('#00ff66'));
-        playBtn.on('pointerdown', () => {
-            playSound(this, 'launch');
-            this.saveSlot();
-            this.scene.start('Game', { mode: 'Custom', levelData: this.levelData, customSlot: this.currentSlot });
-        });
-
-        if (ENABLE_COMMUNITY_MAPS) {
-        const shareBtn = this.add.text(GW - 280, 25, '📤 SHARE', {
-            fontFamily: 'Arial Black', fontSize: '18px', color: '#bb66ff'
-        }).setInteractive({ useHandCursor: true });
-        
-        shareBtn.on('pointerover', () => shareBtn.setColor('#ddbbff'));
-        shareBtn.on('pointerout', () => shareBtn.setColor('#bb66ff'));
-        shareBtn.on('pointerdown', () => {
+        menuBtn.on('pointerover', () => menuBtn.setColor('#ffffff'));
+        menuBtn.on('pointerout', () => menuBtn.setColor('#00ffff'));
+        menuBtn.on('pointerdown', () => {
             playSound(this, 'click');
-            this.saveSlot();
-            this.showShareDialog();
+            this.toggleMenuOverlay(true);
         });
     }
 
-        const clearBtn = this.add.text(GW - 140, 25, 'CLEAR', {
-            fontFamily: 'Arial Black', fontSize: '18px', color: '#ffaa00'
-        }).setInteractive({ useHandCursor: true });
+    private createMenuOverlay() {
+        this.menuOverlay = this.add.container(0, 0).setDepth(2000).setVisible(false);
 
-        clearBtn.on('pointerover', () => clearBtn.setColor('#ffddaa'));
-        clearBtn.on('pointerout', () => clearBtn.setColor('#ffaa00'));
-        clearBtn.on('pointerdown', () => {
+        const cx = GW / 2;
+        const cy = GH / 2;
+        const pw = 360;
+        const ph = 400;
+
+        // Dim full screen
+        const dimBg = this.add.rectangle(cx, cy, GW, GH, 0x000000, 0.65).setInteractive();
+        this.menuOverlay.add(dimBg);
+
+        // Panel
+        const panel = this.add.rectangle(cx, cy, pw, ph, 0x0a1c28).setStrokeStyle(3, 0x00ffff);
+        this.menuOverlay.add(panel);
+
+        // Title
+        const title = this.add.text(cx, cy - 130, 'MENU', {
+            fontFamily: 'Arial Black', fontSize: '26px', color: '#00ffff',
+            stroke: '#000000', strokeThickness: 5
+        }).setOrigin(0.5);
+        this.menuOverlay.add(title);
+
+        const makeBtn = (label: string, yOff: number, color: string, hoverColor: string, action: () => void) => {
+            const rowBg = this.add.rectangle(cx, cy + yOff, pw - 60, 46, 0x112233, 0.9)
+                .setStrokeStyle(1, 0x224455).setInteractive({ useHandCursor: true });
+            const rowText = this.add.text(cx, cy + yOff, label, {
+                fontFamily: 'Arial Black', fontSize: '20px', color: color,
+                stroke: '#000000', strokeThickness: 4
+            }).setOrigin(0.5);
+
+            rowBg.on('pointerover', () => { rowBg.setFillStyle(0x1a3a55); rowText.setColor(hoverColor); });
+            rowBg.on('pointerout',  () => { rowBg.setFillStyle(0x112233); rowText.setColor(color); });
+            rowBg.on('pointerdown', () => { action(); });
+
+            this.menuOverlay.add(rowBg);
+            this.menuOverlay.add(rowText);
+        };
+
+        const buttons = [];
+        buttons.push({ label: '▶ PLAY TEST', color: '#00ff66', hoverColor: '#aaffaa', action: () => {
+            playSound(this, 'launch');
+            this.toggleMenuOverlay(false);
+            this.saveSlot();
+            this.scene.start('Game', { mode: 'Custom', levelData: this.levelData, customSlot: this.currentSlot });
+        }});
+
+        if (ENABLE_COMMUNITY_MAPS) {
+            buttons.push({ label: '📤 SHARE', color: '#bb66ff', hoverColor: '#ddbbff', action: () => {
+                playSound(this, 'click');
+                this.toggleMenuOverlay(false);
+                this.saveSlot();
+                this.showShareDialog();
+            }});
+        }
+
+        buttons.push({ label: '🗑 CLEAR MAP', color: '#ffaa00', hoverColor: '#ffddaa', action: () => {
             playSound(this, 'click');
+            this.toggleMenuOverlay(false);
             this.showClearConfirmation();
-        });
+        }});
 
-        const exitBtn = this.add.text(GW - 50, 25, '✖', {
-            fontFamily: 'Arial Black', fontSize: '24px', color: '#ff4444'
-        }).setInteractive({ useHandCursor: true });
-
-        exitBtn.on('pointerover', () => exitBtn.setColor('#ff8888'));
-        exitBtn.on('pointerout', () => exitBtn.setColor('#ff4444'));
-        exitBtn.on('pointerdown', () => {
+        buttons.push({ label: '✖ QUIT', color: '#ff4444', hoverColor: '#ff8888', action: () => {
             playSound(this, 'click');
+            this.toggleMenuOverlay(false);
             this.saveSlot();
             this.scene.start('MainMenu');
+        }});
+
+        buttons.forEach((b, i) => {
+            makeBtn(b.label, -50 + (i * 55), b.color, b.hoverColor, b.action);
         });
+
+        // Close X
+        const closeX = this.add.text(cx + pw / 2 - 30, cy - ph / 2 + 40, '✖', {
+            fontFamily: 'Arial Black', fontSize: '18px', color: '#888888',
+            stroke: '#000000', strokeThickness: 3
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeX.on('pointerover', () => closeX.setColor('#ffffff'));
+        closeX.on('pointerout',  () => closeX.setColor('#888888'));
+        closeX.on('pointerdown', () => { playSound(this, 'click'); this.toggleMenuOverlay(false); });
+        this.menuOverlay.add(closeX);
+    }
+
+    private toggleMenuOverlay(show: boolean) {
+        this.menuOverlay.setVisible(show);
+        if (show) {
+            this.menuOverlay.setAlpha(0);
+            this.tweens.add({ targets: this.menuOverlay, alpha: 1, duration: 180 });
+        }
     }
 
     private async showShareDialog() {
