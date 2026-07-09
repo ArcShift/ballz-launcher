@@ -1053,7 +1053,8 @@ export class Game extends Scene {
             } else if (this.isCustomMode) {
                 this.scene.start('MapEditor', { slot: this.customSlotIndex });
             } else if (this.isSeedMode) {
-                this.scene.start('SeedPreparation');
+                const randomSeed = Math.floor(Math.random() * 999999) + 1;
+                this.scene.start('SeedGame', { seed: randomSeed });
             } else if (isNextAvailable) {
                 this.scene.start('Game', { level: this.levelNum + 1 });
             } else {
