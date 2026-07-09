@@ -1,6 +1,6 @@
 import { GW, GH } from '../main';
 import { Scene } from 'phaser';
-import { initCrazyGames } from '../services/crazygames';
+import { initCrazyGames, loadingStart, loadingStop } from '../services/crazygames';
 
 export class Preloader extends Scene
 {
@@ -28,6 +28,7 @@ export class Preloader extends Scene
     }
 
     preload () {
+        loadingStart();
         // Set path for other assets if any
         this.load.setPath('img');
         this.load.spritesheet('sprite', 'spritesheet.png', { frameWidth: 64, frameHeight: 64 });
@@ -69,6 +70,7 @@ export class Preloader extends Scene
         }
 
         // Move to the MainMenu
+        loadingStop();
         this.scene.start('MainMenu');
     }
 

@@ -5,7 +5,7 @@ import * as Phaser from 'phaser';
 import { LEVELS } from '../entities/Level';
 import { LevelData } from '../entities/Level';
 import { submitRating, submitComment, getMapComments, getPlayerRatingForMap } from '../services/supabase';
-import { getCrazyUser } from '../services/crazygames';
+import { getCrazyUser, gameplayStart, gameplayStop, happytime } from '../services/crazygames';
 //can't access property "drawImage", this.data is null
 const BALL_INFO = [
     { name: 'Normal Ball', desc: 'Standard weight and bounce.', frame: '0' },
@@ -140,6 +140,7 @@ export class Game extends Scene {
     }
 
     create() {
+        gameplayStart();
         this.uiStars = [];
         this.uiBallsIcons = [];
         
@@ -471,7 +472,7 @@ export class Game extends Scene {
             align: 'left'
         });
 
-        this.add.text(40, GH - 52, 'INVENTORY:', {
+        this.add.text(25, GH - 50, 'INVENTORY:', {
             fontFamily: 'Arial Black',
             fontSize: '14px',
             color: '#aaaaaa'
@@ -799,6 +800,8 @@ export class Game extends Scene {
     }
 
     private handleLevelWin() {
+        gameplayStop();
+        happytime();
         playSound(this, 'portal');
 
         // Clear active balls to stop gameplay loop
@@ -855,6 +858,7 @@ export class Game extends Scene {
     }
 
     private handleLevelLose() {
+        gameplayStop();
         try {
             const page = Math.ceil(this.levelNum / 9);
             localStorage.setItem('ballz_campaign_page', String(page));
@@ -931,6 +935,7 @@ export class Game extends Scene {
 
         // RETRY
         makeBtn('↺  RETRY STAGE', 15, '#ffffff', '#ffcc00', () => {
+            gameplayStop();
             this.togglePauseMenu(false);
             if (this.isCommunityMode) {
                 this.scene.restart({
@@ -953,6 +958,7 @@ export class Game extends Scene {
 
         // CLOSE / EXIT
         makeBtn('✖  CLOSE STAGE', 75, '#ff4444', '#ff8888', () => {
+            gameplayStop();
             this.togglePauseMenu(false);
             if (this.isCommunityMode) {
                 this.scene.start('CommunityMaps');

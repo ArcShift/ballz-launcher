@@ -129,3 +129,23 @@ export function happytime() {
         }
     }
 }
+
+export function loadingStart() {
+    if (isSDKAvailable()) {
+        try {
+            window.CrazyGames!.SDK.game.loadingStart();
+        } catch (e) {
+            console.error('Error calling loadingStart:', e);
+        }
+    }
+}
+
+export function loadingStop() {
+    if (isSDKAvailable()) {
+        try {
+            window.CrazyGames!.SDK.game.loadingStop();
+        } catch (e) {
+            console.error('Error calling loadingStop:', e);
+        }
+    }
+}
