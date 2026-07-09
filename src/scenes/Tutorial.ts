@@ -43,6 +43,8 @@ export class Tutorial extends Scene {
     private contentText: GameObjects.Text;
     private pageIndicator: GameObjects.Text;
     private imagesGroup: GameObjects.Group;
+    private prevBtn: GameObjects.Text;
+    private nextBtn: GameObjects.Text;
     
     constructor() {
         super('Tutorial');
@@ -92,8 +94,8 @@ export class Tutorial extends Scene {
         this.imagesGroup = this.add.group();
 
         // Buttons
-        this.createButton(150, GH - 120, '◄ PREV', () => this.changePage(-1));
-        this.createButton(GW - 150, GH - 120, 'NEXT ►', () => this.changePage(1));
+        this.prevBtn = this.createButton(150, GH - 120, '◄ PREV', () => this.changePage(-1));
+        this.nextBtn = this.createButton(GW - 150, GH - 120, 'NEXT ►', () => this.changePage(1));
         this.createButton(GW / 2, GH - 40, 'BACK TO MENU', () => {
             playSound(this, 'click');
             this.scene.start('MainMenu');
@@ -133,6 +135,18 @@ export class Tutorial extends Scene {
         this.titleText.setText(data.title);
         this.contentText.setText(data.text);
         this.pageIndicator.setText(`Page ${this.currentPage + 1} of ${TUTORIAL_PAGES.length}`);
+
+        if (this.currentPage === 0) {
+            this.prevBtn.setAlpha(0.3).disableInteractive();
+        } else {
+            this.prevBtn.setAlpha(1).setInteractive({ useHandCursor: true });
+        }
+
+        if (this.currentPage === TUTORIAL_PAGES.length - 1) {
+            this.nextBtn.setAlpha(0.3).disableInteractive();
+        } else {
+            this.nextBtn.setAlpha(1).setInteractive({ useHandCursor: true });
+        }
 
         // Clear old images
         this.imagesGroup.clear(true, true);
