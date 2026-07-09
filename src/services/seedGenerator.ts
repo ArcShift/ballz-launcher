@@ -59,14 +59,6 @@ type BlockDef = { x: number; y: number; type: number };
 type SpikeDef = { x: number; y: number };
 type StarDef  = { x: number; y: number };
 
-interface GeneratedLayout {
-    blocks: BlockDef[];
-    spikes: SpikeDef[];
-    stars:  StarDef[];
-    launcher: { x: number; y: number };
-    portal:   { x: number; y: number };
-}
-
 /**
  * Generate a deterministic level layout from a numeric seed.
  * The algorithm:

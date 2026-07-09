@@ -43,7 +43,7 @@ export class MainMenu extends Scene {
             align: 'center'
         }).setOrigin(0.5);
 
-        this.descriptionText = this.add.text(512, GH - 100, '', {
+        this.descriptionText = this.add.text(512, GH - 50, '', {
             fontFamily: 'Fredoka',
             fontSize: '16px',
             color: '#ffffff',

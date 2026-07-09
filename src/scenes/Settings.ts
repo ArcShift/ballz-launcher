@@ -60,6 +60,7 @@ export class Settings extends Scene {
 
     create() {
         this.settings = loadSettings();
+        this.settings.fullscreen = this.scale.isFullscreen;
 
         // ── Background ─────────────────────────────────────────────────────
         this.add.image(GW / 2, GH / 2, 'background').setDisplaySize(GW, GH);
